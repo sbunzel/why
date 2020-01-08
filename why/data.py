@@ -3,8 +3,22 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import pandas as pd
+import streamlit as st
 
-__all__ = ["CarInsurance"]
+__all__ = ["get_data", "CarInsurance"]
+
+
+@st.cache
+def get_data(
+    dataset: str, config: Dict[str, Any], datapath: Path
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    if dataset == "car_insurance_cold_calls":
+        data = CarInsurance(config, datapath)
+    else:
+        raise NotImplementedError(
+            f"No data set for {dataset.replace('_', ' ').title()} available."
+        )
+    return data.train, data.test
 
 
 class CarInsurance:
