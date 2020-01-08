@@ -1,53 +1,41 @@
-import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import pandas as pd
 import streamlit as st
-from sklearn.ensemble import RandomForestClassifier
-from sklearn import metrics
-from sklearn.inspection import permutation_importance, plot_partial_dependence
+from sklearn.inspection import plot_partial_dependence
 from stratx.partdep import plot_stratpd
 
-from why import data, preprocessing
-
+# from why import data, preprocessing, utils
+import why.data as data
+import why.preprocessing as preprocessing
+import why.utils as utils
+import why.models as models
+import why.interpret as interpret
 
 st.title("Why?")
 st.header("An exploration into the world of interpretable machine learning")
 
+# Read the configuration and the dataset selected by the user
 st.subheader("The Dataset")
-# Let the user define the dataset to be used on collect it based on their input
-dataset = (
-    st.selectbox("Please select a dataset", ["Car Insurance Cold Calls"])
-    .lower()
-    .replace(" ", "_")
-)
-
-config_path = (Path(__file__).parent / "resources" / f"{dataset}.json").resolve()
-with open(config_path, mode="r") as f:
-    config = json.load(f)
+dataset = st.selectbox("Please select a dataset", ["Car Insurance Cold Calls"])
+config = utils.get_config(dataset)
 train, test = data.get_data(
     dataset, config, (Path(__file__).parent / "data" / "raw").resolve()
 )
-n_rows = train.shape[0] + test.shape[0]
-n_cols = train.shape[1] + test.shape[1]
-st.markdown(
-    f"There are **{n_rows}** observations and **{n_cols - 1}** features in this dataset. The target variable is **{config['target']}.**"
-)
-
+st.markdown(utils.get_data_summary(train, test, config["target"]))
 st.dataframe(train, height=150)
 
 # Prepare the data for modeling
 trans = preprocessing.InsuranceTransformer(config)
 X_train, X_valid, y_train, y_valid = trans.prepare_train_valid(train)
 
-# Limit the dataset
+# Filter the dataset
 st.sidebar.subheader("Filters")
-original_features = sorted(set(train.columns) - set(config["target"]))
-drop_cols = st.sidebar.multiselect(
-    "Please select features to exclude", options=original_features
+to_drop = st.sidebar.multiselect(
+    "Please select features to exclude",
+    options=sorted(set(train.columns) - set(config["target"])),
 )
-to_drop = [c for c in X_train.columns if any(d in c for d in drop_cols)]
+to_drop = [c for c in X_train.columns if any(d in c for d in to_drop)]
 X_train = X_train.drop(columns=to_drop, errors="ignore")
 X_valid = X_valid.drop(columns=to_drop, errors="ignore")
 
@@ -55,11 +43,8 @@ X_valid = X_valid.drop(columns=to_drop, errors="ignore")
 st.sidebar.header("Settings and Model Details")
 st.sidebar.subheader("Model Type")
 model_type = st.sidebar.selectbox("Please select a model type", ["Random Forest"])
-
 with st.spinner(f"Fitting the {model_type} model..."):
-    m = RandomForestClassifier(
-        n_estimators=20, min_samples_leaf=3, max_depth=12, n_jobs=-1,
-    ).fit(X_train, y_train)
+    m = models.fit_model(model_type, X_train, y_train)
 
 # Report model performance
 st.sidebar.subheader("Model Performance")
@@ -70,35 +55,16 @@ thresh = st.sidebar.slider(
     value=0.5,
     step=0.05,
 )
-
-train_pred = m.predict_proba(X_train)[:, 1]
-valid_pred = m.predict_proba(X_valid)[:, 1]
-scores = pd.DataFrame(
-    {
-        "Accuracy": [
-            metrics.accuracy_score(y_train, train_pred > thresh),
-            metrics.accuracy_score(y_valid, valid_pred > thresh),
-        ],
-        "ROC AUC": [
-            metrics.roc_auc_score(y_train, train_pred),
-            metrics.roc_auc_score(y_valid, valid_pred),
-        ],
-    },
-    index=["Training", "Validation"],
+scores, train_pred, valid_pred = models.get_model_scores(
+    m, thresh, X_train, X_valid, y_train, y_valid
 )
-
 st.sidebar.markdown("**Metrics**")
 st.sidebar.dataframe(scores)
-
-st.sidebar.markdown("**Confusion Matrix**")
-index = ["True 0", "True 1"]
-columns = ["Pred 0", "Pred 1"]
-conf_matrix = pd.DataFrame(
-    metrics.confusion_matrix(y_valid, valid_pred > thresh), columns=columns, index=index
-)
+st.sidebar.markdown("**Validation Confusion Matrix**")
+conf_matrix = models.get_confusion_matrix(y_valid, valid_pred, thresh)
 st.sidebar.dataframe(conf_matrix)
 
-# Show interpretation results
+# Showcase and compare interpretation methods
 st.subheader("Understanding the Model")
 feature_names = X_train.columns
 
@@ -106,19 +72,10 @@ feature_names = X_train.columns
 st.markdown("**Most Important Features**")
 if st.checkbox("Calculate feature importances"):
     with st.spinner("Calculating the feature importance..."):
-        permutation_feat_imp_valid = permutation_importance(
+        imp = interpret.feature_importance(
             m, X_valid.values, y_valid, n_repeats=10, n_jobs=-1
         )
-
-    sorted_idx = permutation_feat_imp_valid.importances_mean.argsort()[-15:]
-    fig, ax = plt.subplots()
-    ax.boxplot(
-        permutation_feat_imp_valid.importances[sorted_idx].T,
-        vert=False,
-        labels=feature_names[sorted_idx],
-    )
-    ax.set_title("Permutation Importances (on the validation set)")
-    plt.tight_layout()
+    fig, ax = interpret.plot_importance(imp, feature_names)
     st.pyplot()
 
 # Partial Dependence Plots

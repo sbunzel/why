@@ -12,19 +12,17 @@ __all__ = ["get_data", "CarInsurance"]
 def get_data(
     dataset: str, config: Dict[str, Any], datapath: Path
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    if dataset == "car_insurance_cold_calls":
+    if dataset == "Car Insurance Cold Calls":
         data = CarInsurance(config, datapath)
     else:
-        raise NotImplementedError(
-            f"No data set for {dataset.replace('_', ' ').title()} available."
-        )
+        raise NotImplementedError(f"No data set for {dataset} available.")
     return data.train, data.test
 
 
 class CarInsurance:
     def __init__(self, config: Dict[str, Any], datapath: Path) -> None:
         """Initialize the car insurance data set
-        
+
         Args:
             config (Dict[str, Any]): Configuration file for the car insurance data
             datapath (Path): Path to the folder containing the car insurance data
@@ -35,7 +33,7 @@ class CarInsurance:
 
     def prepare_data(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Read the insurance data and apply the data transformation pipeline to train and test
-        
+
         Returns:
             Tuple[pd.DataFrame, pd.DataFrame]: The prepared car insurance train and test set
         """
@@ -44,7 +42,7 @@ class CarInsurance:
 
     def get_data(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Read the car insurance data into a Pandas DataFrame
-        
+
         Returns:
             Tuple[pd.DataFrame, pd.DataFrame]: The raw car insurance train and test set
         """
@@ -63,10 +61,10 @@ class CarInsurance:
 
     def preparation_pipe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Combine preprocessing steps for the car insurance data in one function
-        
+
         Args:
             df (pd.DataFrame): Raw car insurance data
-        
+
         Returns:
             pd.DataFrame: Transformed car insurance data
         """
@@ -79,10 +77,10 @@ class CarInsurance:
 
     def add_call_time_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add new features based on CallStart and CallEnd
-        
+
         Args:
             df (pd.DataFrame): Car insurance data
-        
+
         Returns:
             pd.DataFrame: Enhanced car insurance data
         """
@@ -97,12 +95,12 @@ class CarInsurance:
         self, df: pd.DataFrame, cols: List[str] = ["CarLoan", "Default", "HHInsurance"]
     ) -> pd.DataFrame:
         """Map binary columns to more expressive values
-        
+
         Args:
             df (pd.DataFrame): Car insurance data
             cols (List[str], optional): Column names of binary columns to transform.
                 Defaults to ["CarLoan", "Default", "HHInsurance"].
-        
+
         Returns:
             pd.DataFrame: Transformed car insurance data
         """

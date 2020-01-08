@@ -18,7 +18,7 @@ class InsuranceTransformer(ColumnTransformer):
     def __init__(self, config: Dict[str, Any]) -> None:
         """Initialize the car insurance transformer.
         Extends Scikit-Learn's ColumnTransformer.
-        
+
         Args:
             config (Dict[str, Any]): Configuration file for the car insurance data set
         """
@@ -39,10 +39,10 @@ class InsuranceTransformer(ColumnTransformer):
 
     def prepare_train_valid(self, df: pd.DataFrame) -> Tuple[np.ndarray]:
         """Split the training data into train and valid and apply the transformation pipeline
-        
+
         Args:
             df (pd.DataFrame): The training data
-        
+
         Returns:
             Tuple[np.ndarray]: X_train, X_valid, y_train, y_valid
         """
@@ -65,7 +65,7 @@ class InsuranceTransformer(ColumnTransformer):
 
     def get_feature_names(self) -> Tuple[np.ndarray]:
         """Extract the feature names of the transformed data from the transformer
-        
+
         Returns:
             Tuple[np.ndarray]: Categorical feature names, all feature names
         """
@@ -76,10 +76,10 @@ class InsuranceTransformer(ColumnTransformer):
 
     def save_transformed(self, savepath: Path) -> Dict[str, Path]:
         """Save the Scikit-Learn transformer and the transformed data
-        
+
         Args:
             savepath (Path): Path to save to
-        
+
         Returns:
             Dict[str, Path]: A dictionary containing the filepaths
         """
@@ -102,11 +102,11 @@ class InsuranceTransformer(ColumnTransformer):
 
 def remove_high_corrs(df: pd.DataFrame, min_corr: float = 1.0) -> pd.DataFrame:
     """Drop highly correlated features from a DataFrame
-    
+
     Args:
         df (pd.DataFrame): DataFrame containing the features
         min_corr (float, optional): Minimum value for Pearson correlation to consider a correlation as high. Defaults to 1.0. . Defaults to 1.0.
-    
+
     Returns:
         pd.DataFrame: The feature data with highly correlated features removed
     """
@@ -116,11 +116,11 @@ def remove_high_corrs(df: pd.DataFrame, min_corr: float = 1.0) -> pd.DataFrame:
 
 def get_high_corrs(df: pd.DataFrame, min_corr: float = 1.0) -> pd.DataFrame:
     """Find features with high correlation
-    
+
     Args:
         df (pd.DataFrame): DataFrame containing the features
         min_corr (float, optional): Minimum value for Pearson correlation to consider a correlation as high. Defaults to 1.0.
-    
+
     Returns:
         pd.DataFrame: The highly correlated features
     """
