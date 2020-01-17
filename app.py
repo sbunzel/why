@@ -106,9 +106,9 @@ st.markdown("#### Distribution of Model Predictions")
 distribution_plot = st.empty()
 p_min, p_max = st.slider(
     "Select range of predictions to explain",
-    min_value=0.,
-    max_value=1.,
-    value=(0.9, 1.),
+    min_value=0.0,
+    max_value=1.0,
+    value=(0.9, 1.0),
     step=0.01,
 )
 fig, ax = models.plot_predictions(valid_pred, p_min, p_max)
