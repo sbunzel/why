@@ -42,6 +42,8 @@ X_valid = X_valid.drop(columns=to_drop, errors="ignore")
 
 # Specify and fit a model
 st.sidebar.markdown("# Settings and Model Details")
+seed = st.sidebar.number_input("Please choose a random seed", value=42)
+np.random.seed(seed)
 st.sidebar.markdown("## Model Type")
 model_type = st.sidebar.selectbox("Please select a model type", ["Random Forest"])
 with st.spinner(f"Fitting the {model_type} model..."):
@@ -104,9 +106,9 @@ st.markdown("#### Distribution of Model Predictions")
 distribution_plot = st.empty()
 p_min, p_max = st.slider(
     "Select range of predictions to explain",
-    min_value=valid_pred.min(),
-    max_value=valid_pred.max(),
-    value=(0.1, 0.9),
+    min_value=0.,
+    max_value=1.,
+    value=(0.9, 1.),
     step=0.01,
 )
 fig, ax = models.plot_predictions(valid_pred, p_min, p_max)
