@@ -37,6 +37,7 @@ def shap_feature_values(
     ids: Union[np.ndarray, List[int]],
     n_feats: int = 5,
 ) -> Tuple[pd.DataFrame, np.ndarray]:
+    # TODO: Handle case when zero samples where selected gracefully
     top_feat_ids = np.argsort(np.abs(shap_values[1][ids, :]))[:, ::-1][:, :n_feats]
     sample_p1s = np.round(model.predict_proba(X.iloc[ids, :])[:, 1], 4)
     sample_shaps = np.array(
