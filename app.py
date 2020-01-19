@@ -12,6 +12,7 @@ import why.preprocessing as preprocessing
 import why.utils as utils
 import why.models as models
 import why.interpret as interpret
+import why.display as display
 
 st.markdown("# Why?")
 st.markdown("**_An exploration into the world of interpretable machine learning_**")
@@ -42,7 +43,7 @@ X_valid = X_valid.drop(columns=to_drop, errors="ignore")
 
 # Specify and fit a model
 st.sidebar.markdown("# Settings and Model Details")
-seed = st.sidebar.number_input("Please choose a random seed", value=42)
+seed = st.sidebar.number_input("Please choose a seed", value=42)
 np.random.seed(seed)
 st.sidebar.markdown("## Model Type")
 model_type = st.sidebar.selectbox("Please select a model type", ["Random Forest"])
@@ -111,5 +112,17 @@ p_min, p_max = st.slider(
     value=(0.9, 1.0),
     step=0.01,
 )
-fig, ax = models.plot_predictions(valid_pred, p_min, p_max)
+fig, ax = display.plot_predictions(valid_pred, p_min, p_max)
 distribution_plot.pyplot()
+
+selected_ids = np.where(np.logical_and(valid_pred >= p_min, valid_pred <= p_max))[0]
+n_feats = st.number_input(
+    "Please select the number of features to show", value=3, min_value=3, max_value=10
+)
+
+st.markdown(f"#### Shapley Values for Top {n_feats} Features")
+shap_values = interpret.shap_values(m, X_valid)
+feat_values, local_effects = interpret.shap_feature_values(
+    m, X_valid, shap_values, selected_ids, n_feats=n_feats
+)
+st.table(display.format_local_explanations(feat_values))
