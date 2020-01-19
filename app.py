@@ -33,13 +33,15 @@ X_train, X_valid, y_train, y_valid = trans.prepare_train_valid(train)
 
 # Filter the dataset
 st.sidebar.markdown("# Filters")
-to_drop = st.sidebar.multiselect(
-    "Please select features to exclude",
-    options=sorted(set(train.columns) - set(config["target"])),
-)
+all_feats = sorted(set(train.columns) - set(config["target"]))
+to_drop = st.sidebar.multiselect("Please select features to exclude", options=all_feats)
 to_drop = [c for c in X_train.columns if any(d in c for d in to_drop)]
-X_train = X_train.drop(columns=to_drop, errors="ignore")
-X_valid = X_valid.drop(columns=to_drop, errors="ignore")
+X_train = X_train.pipe(preprocessing.remove_high_corrs, min_corr=1.0).drop(
+    columns=to_drop, errors="ignore"
+)
+X_valid = X_valid.pipe(preprocessing.remove_high_corrs, min_corr=1.0).drop(
+    columns=to_drop, errors="ignore"
+)
 
 # Specify and fit a model
 st.sidebar.markdown("# Settings and Model Details")
