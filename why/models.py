@@ -1,6 +1,5 @@
 from typing import Union, Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
@@ -90,26 +89,3 @@ def get_confusion_matrix(
     return pd.DataFrame(
         metrics.confusion_matrix(y_true, y_pred > thresh), columns=columns, index=index
     )
-
-
-def plot_predictions(y_pred: np.ndarray, p_min: float, p_max: float) -> Tuple:
-    """Plot model predictions as a histogram and highlight predictions in a selected range
-    
-    Args:
-        y_pred (np.ndarray): Array of predictions
-        p_min (float): Lower boundary of predictions to highlight
-        p_max (float): Upper boundary of predictions to highlight
-    
-    Returns:
-        Tuple: Matplotlib figure and axes
-    """
-    fig, ax = plt.subplots()
-    ax.hist(y_pred, bins=100, color="grey")
-    for i, r in enumerate(ax.patches):
-        if p_min <= r.get_x() <= p_max:
-            ax.patches[i].set_color("green")
-    ax.set_title("Model Prediction")
-    ax.set_xlabel("Predicted probability of class 1")
-    ax.set_ylabel("Number of predictions")
-    plt.tight_layout()
-    return fig, ax
