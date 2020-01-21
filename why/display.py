@@ -39,5 +39,7 @@ def color_by_sign(val):
 def format_local_explanations(feat_values: pd.DataFrame) -> pd.DataFrame.style:
     cm = sns.light_palette("#90ee90", as_cmap=True)
     return feat_values.style.applymap(
-        color_by_sign, subset=list(set(feat_values.columns) - set(["Prediction"])),
-    ).background_gradient(cmap=cm, axis="index", subset=["Prediction"])
+        color_by_sign, subset=list(set(feat_values.columns) - set(["Prediction"]))
+    ).background_gradient(
+        cmap=cm, axis="index", subset=["Prediction"]
+    )  # TODO: This should be red for small p1s
