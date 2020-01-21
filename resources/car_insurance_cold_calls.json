@@ -32,5 +32,11 @@
         "LastCallDurationSecs",
         "LastCallHourOfDay"
     ],
-    "target": "CarInsurance"
+    "target": "CarInsurance",
+    "last_contact_features": [
+        "LastContactDayOfMonth",
+        "LastContactMonth",
+        "LastCallDurationSecs",
+        "LastCallHourOfDay"
+    ]
 }
