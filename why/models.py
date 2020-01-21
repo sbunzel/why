@@ -25,7 +25,7 @@ def fit_model(model_type: str, X_train: FeatureTable, y_train: TargetVector):
     """
     if model_type == "Random Forest":
         m = RandomForestClassifier(
-            n_estimators=20, min_samples_leaf=3, max_depth=12, n_jobs=-1,
+            n_estimators=20, min_samples_leaf=3, max_depth=12, n_jobs=-1
         ).fit(X_train, y_train)
     else:
         raise NotImplementedError(f"Model type {model_type} is not implemented yet.")

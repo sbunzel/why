@@ -17,7 +17,7 @@ def plot_importance(imp, feature_names):
     sorted_idx = imp.importances_mean.argsort()[-15:]
     fig, ax = plt.subplots()
     ax.boxplot(
-        imp.importances[sorted_idx].T, vert=False, labels=feature_names[sorted_idx],
+        imp.importances[sorted_idx].T, vert=False, labels=feature_names[sorted_idx]
     )
     ax.set_title("Permutation Importances (on the validation set)")
     plt.tight_layout()
@@ -48,7 +48,7 @@ def shap_feature_values(
         [
             [
                 f"{c} = {v} ( {s:+.2f} )"
-                for (c, v), s in zip(X.iloc[sample, feats].iteritems(), shaps,)
+                for (c, v), s in zip(X.iloc[sample, feats].iteritems(), shaps)
             ]
             for sample, feats, shaps in zip(ids, top_feat_ids, sample_shaps)
         ]
