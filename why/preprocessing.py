@@ -53,10 +53,10 @@ class InsuranceTransformer(ColumnTransformer):
         X_v = self.transform(X_v)
 
         cat_names, feature_names = self.get_feature_names()
-        X_t = pd.DataFrame(X_t, columns=feature_names).astype(
+        X_t = pd.DataFrame(X_t, columns=feature_names, index=y_t.index).astype(
             {feat: int for feat in cat_names}
         )
-        X_v = pd.DataFrame(X_v, columns=feature_names).astype(
+        X_v = pd.DataFrame(X_v, columns=feature_names, index=y_v.index).astype(
             {feat: int for feat in cat_names}
         )
 
