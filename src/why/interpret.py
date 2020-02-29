@@ -1,6 +1,5 @@
-from typing import List, Union, Tuple
+from typing import List, Iterable, Union, Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import shap
@@ -8,20 +7,20 @@ from sklearn import inspection
 import streamlit as st
 
 
-@st.cache
-def feature_importance(*args, **kwargs):
-    return inspection.permutation_importance(*args, **kwargs)
-
-
-def plot_importance(imp, feature_names):
-    sorted_idx = imp.importances_mean.argsort()[-15:]
-    fig, ax = plt.subplots()
-    ax.boxplot(
-        imp.importances[sorted_idx].T, vert=False, labels=feature_names[sorted_idx]
-    )
-    ax.set_title("Permutation Importances (on the validation set)")
-    plt.tight_layout()
-    return fig, ax
+# @st.cache
+def feature_importance(type: str, feature_names: Iterable[str], **kwargs):
+    m = kwargs["estimator"]
+    if type == "impurity":
+        imp = m.feature_importances_
+        imp = imp / len(imp)
+        sorted_idx = imp.argsort()[-15:]
+        return imp[sorted_idx], feature_names[sorted_idx]
+    elif type == "permutation":
+        imp = inspection.permutation_importance(**kwargs)
+        sorted_idx = imp.importances_mean.argsort()[-15:]
+        return imp.importances[sorted_idx].T, feature_names[sorted_idx]
+    else:
+        raise NotImplementedError(f"Feature importance method {type} is not defined. Use either `impurity` or `permutation`.")
 
 
 @st.cache()

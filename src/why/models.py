@@ -34,41 +34,46 @@ def fit_model(model_type: str, X_train: FeatureTable, y_train: TargetVector):
 
 def get_model_scores(
     m,
-    thresh: float,
     X_train: FeatureTable,
     X_valid: FeatureTable,
     y_train: TargetVector,
     y_valid: TargetVector,
+    return_performace: bool=False,
+    **kwargs,
 ) -> Tuple[pd.DataFrame, np.ndarray, np.ndarray]:
     """Generate predictions and gather common performance metrics
     
     Args:
         m ([type]): The model to make predictions with
-        thresh (float): The classification threshold (classification only)
         X_train (Union[pd.DataFrame, np.ndarray]): Training feature table
         X_valid (Union[pd.DataFrame, np.ndarray]): Validation feature table
         y_train (Union[pd.Series, np.ndarray]): Training target vector
-        y_valid (Union[pd.Series, np.ndarray]): Validation target vector
+        y_valid (Union[pd.Series, np.ndarray]): Validation target vector,
+        return_performance (bool): Whether to calculate and return performance scores
     
     Returns:
-        Tuple[pd.DataFrame, np.ndarray, np.ndarray]: Tuple of metric table, training predictions, validation predictions
+        Tuple[pd.DataFrame, np.ndarray, np.ndarray]: Tuple of metric table (optional), training predictions, validation predictions
     """
     train_pred = m.predict_proba(X_train)[:, 1]
     valid_pred = m.predict_proba(X_valid)[:, 1]
-    scores = pd.DataFrame(
-        {
-            "Accuracy": [
-                metrics.accuracy_score(y_train, train_pred > thresh),
-                metrics.accuracy_score(y_valid, valid_pred > thresh),
-            ],
-            "ROC AUC": [
-                metrics.roc_auc_score(y_train, train_pred),
-                metrics.roc_auc_score(y_valid, valid_pred),
-            ],
-        },
-        index=["Training", "Validation"],
-    )
-    return scores, train_pred, valid_pred
+    if return_performace:
+        thresh = kwargs.get("thresh", 0.5)
+        scores = pd.DataFrame(
+            {
+                "Accuracy": [
+                    metrics.accuracy_score(y_train, train_pred > "thresh"),
+                    metrics.accuracy_score(y_valid, valid_pred > "thresh"),
+                ],
+                "ROC AUC": [
+                    metrics.roc_auc_score(y_train, train_pred),
+                    metrics.roc_auc_score(y_valid, valid_pred),
+                ],
+            },
+            index=["Training", "Validation"],
+        )
+        return scores, train_pred, valid_pred
+    else:
+        return train_pred, valid_pred
 
 
 def get_confusion_matrix(

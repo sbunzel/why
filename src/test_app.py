@@ -19,40 +19,37 @@ def main():
     st.sidebar.title("Navigation")
     page = PAGES[st.sidebar.radio("Go to", list(PAGES.keys()))]
 
-    st.sidebar.title("Settings and Details")
-    st.sidebar.markdown("## General")
+    st.sidebar.title("Settings")
     dataset = st.sidebar.selectbox(
         "Please select a dataset", ["Car Insurance Cold Calls"]
     )
     remove_leaky = st.sidebar.radio(
         "Exclude features derived from the last contact - they might be leaky!",
         ["No", "Yes"],
+        key="remove_leaky"
     )
     remove_leaky = True if remove_leaky == "Yes" else False
     min_corr = st.sidebar.slider(
         "Mininum correlation to drop correlated features", 0.5, 1.0, 1.0, step=0.05
     )
-    seed = st.sidebar.number_input(
-        "Change the seed to investigate how random effects might impact the model and explanations",
-        value=42,
+    # seed = st.sidebar.number_input(
+    #     "Change the seed to investigate how random effects might impact the model and explanations",
+    #     value=42,
+    # )
+    np.random.seed(42)
+    random_feature = st.sidebar.radio(
+        "Insert a random feature to investigate its effect on the explanations",
+        ["No", "Yes"],
+        key="random_feature"
     )
-    np.random.seed(seed)
-    st.sidebar.markdown("## Model Type")
+    random_feature = True if random_feature == "Yes" else False
     model_type = st.sidebar.selectbox(
         "Change the model type to understand its impact on the explanations",
         ["Random Forest"],
     )
-    st.sidebar.markdown("## Model Performance")
-    threshold = st.sidebar.slider(
-        "The classification threshold used to calculate accuracy and derive the confusion matrix",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.5,
-        step=0.05,
-    )
-    session = {k: v for k, v in locals().items()}
-    state = home.get_state(session)
-    page.write(state)
+    settings = {k: v for k, v in locals().items()}
+    session = home.get_state(settings)
+    page.write(session)
 
 
 if __name__ == "__main__":

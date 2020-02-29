@@ -1,9 +1,10 @@
 import re
-from typing import Tuple
+from typing import List, Tuple
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.metrics import average_precision_score, precision_recall_curve
 import seaborn as sns
 
 
@@ -30,6 +31,20 @@ def plot_predictions(y_pred: np.ndarray, p_min: float, p_max: float) -> Tuple:
     return fig, ax
 
 
+def plot_precision_recall_curve(y_train, y_valid, train_pred, valid_pred):
+    train_pr, train_rc, _ = precision_recall_curve(y_train, train_pred)
+    train_ap = average_precision_score(y_train, train_pred)
+    valid_pr, valid_rc, _ = precision_recall_curve(y_valid, valid_pred)
+    valid_ap = average_precision_score(y_valid, valid_pred)
+
+    fig, ax = plt.subplots()
+    ax.plot(train_rc, train_pr, label=f"Train Average Precision = {train_ap:.2f}")
+    ax.plot(valid_rc, valid_pr, label=f"Test Average Precision = {valid_ap:.2f}")
+    ax.set(title="Precision-Recall Curve", xlabel="Recall", ylabel="Precision")
+    plt.legend()
+    return fig
+
+
 def color_by_sign(val):
     sign = re.search("(\( ([\+\-])\d\.)", val).group(2)
     color = "#ee9090" if sign == "-" else "#90ee90"
@@ -39,7 +54,39 @@ def color_by_sign(val):
 def format_local_explanations(feat_values: pd.DataFrame) -> pd.DataFrame.style:
     cm = sns.light_palette("#90ee90", as_cmap=True)
     return feat_values.style.applymap(
-        color_by_sign, subset=list(set(feat_values.columns) - set(["Prediction"]))
+        color_by_sign, subset=list(set(feat_values.columns) - set("Prediction"))
     ).background_gradient(
-        cmap=cm, axis="index", subset=["Prediction"]
+        cmap=cm, axis="index", subset="Prediction"
     )  # TODO: This should be red for small p1s
+
+
+def plot_impurity_importance(imp: np.ndarray, feature_names: List[str]):
+    fig, ax = plt.subplots()
+    y_pos = np.arange(len(feature_names))
+    ax.barh(y_pos, imp, align="center")
+    ax.set(title="Impurity-based Importances (on the training set)", xlabel="Absolute Importance", yticks=y_pos, yticklabels=feature_names)
+    plt.tight_layout()
+    return fig, ax
+
+# def plot_impurity_importance(imp: np.ndarray, feature_names: List[str], ax):
+#     y_pos = np.arange(len(feature_names))
+#     ax.barh(y_pos, imp, align="center")
+#     ax.set(title="Impurity-based Importances (on the training set)", xlabel="Absolute Importance", yticks=y_pos, yticklabels=feature_names)
+#     return ax
+
+
+def plot_permutation_importance(imp: np.ndarray, feature_names: List[str]):
+    fig, ax = plt.subplots()
+    ax.boxplot(
+        imp, vert=False, labels=feature_names
+    )
+    ax.set(title="Permutation Importances (on the validation set)", xlabel="Absolute Importance")
+    plt.tight_layout()
+    return fig, ax
+
+# def plot_permutation_importance(imp: np.ndarray, feature_names: List[str], ax):
+#     ax.boxplot(
+#         imp, vert=False, labels=feature_names
+#     )
+#     ax.set(title="Permutation Importances (on the validation set)", xlabel="Absolute Importance")
+#     return ax
