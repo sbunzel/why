@@ -5,18 +5,23 @@ from typing import Any, Dict, List, Tuple
 import pandas as pd
 import streamlit as st
 
+from .preprocessing import InsuranceTransformer
+from .utils import get_data_summary
+
 __all__ = ["get_data", "CarInsurance"]
 
 
 @st.cache
-def get_data(
-    dataset: str, config: Dict[str, Any], datapath: Path
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def get_data(dataset: str, config: Dict[str, Any], datapath: Path):
     if dataset == "Car Insurance Cold Calls":
         data = CarInsurance(config, datapath)
     else:
         raise NotImplementedError(f"No data set for {dataset} available.")
-    return data.train, data.test
+
+    trans = InsuranceTransformer(config)
+    X_train, X_valid, y_train, y_valid = trans.prepare_train_valid(data.train)
+    summary = get_data_summary(data.train, data.test, config["target"])
+    return X_train, X_valid, y_train, y_valid, summary
 
 
 class CarInsurance:

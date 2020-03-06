@@ -23,15 +23,6 @@ def main():
     dataset = st.sidebar.selectbox(
         "Please select a dataset", ["Car Insurance Cold Calls"]
     )
-    remove_leaky = st.sidebar.radio(
-        "Exclude features derived from the last contact - they might be leaky!",
-        ["No", "Yes"],
-        key="remove_leaky"
-    )
-    remove_leaky = True if remove_leaky == "Yes" else False
-    min_corr = st.sidebar.slider(
-        "Mininum correlation to drop correlated features", 0.5, 1.0, 1.0, step=0.05
-    )
     # seed = st.sidebar.number_input(
     #     "Change the seed to investigate how random effects might impact the model and explanations",
     #     value=42,
@@ -40,7 +31,7 @@ def main():
     random_feature = st.sidebar.radio(
         "Insert a random feature to investigate its effect on the explanations",
         ["No", "Yes"],
-        key="random_feature"
+        key="random_feature",
     )
     random_feature = True if random_feature == "Yes" else False
     model_type = st.sidebar.selectbox(
