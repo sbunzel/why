@@ -46,15 +46,23 @@ def plot_precision_recall_curve(y_train, y_valid, train_pred, valid_pred):
 
 
 def color_by_sign(val):
-    sign = re.search("(\( ([\+\-])\d\.)", val).group(2)
-    color = "#ee9090" if sign == "-" else "#90ee90"
+    try:
+        sign = re.search("(\( ([\+\-])\d\.)", val).group(2)
+    except Exception:
+        sign = None
+    if sign == "-":
+        color = "#ee9090"
+    elif sign == "+":
+        color = "#90ee90"
+    else:
+        color = "#a9a9a9"
     return f"border-left: 8px solid {color}"
 
 
 def format_local_explanations(feat_values: pd.DataFrame) -> pd.DataFrame.style:
     cm = sns.light_palette("#90ee90", as_cmap=True)
     return feat_values.style.applymap(
-        color_by_sign, subset=list(set(feat_values.columns) - set("Prediction"))
+        color_by_sign, subset=list(set(feat_values.columns) - set(["Prediction"]))
     ).background_gradient(
         cmap=cm, axis="index", subset="Prediction"
     )  # TODO: This should be red for small p1s
@@ -64,9 +72,15 @@ def plot_impurity_importance(imp: np.ndarray, feature_names: List[str]):
     fig, ax = plt.subplots()
     y_pos = np.arange(len(feature_names))
     ax.barh(y_pos, imp, align="center")
-    ax.set(title="Impurity-based Importances (on the training set)", xlabel="Absolute Importance", yticks=y_pos, yticklabels=feature_names)
+    ax.set(
+        title="Impurity-based Importances (on the training set)",
+        xlabel="Absolute Importance",
+        yticks=y_pos,
+        yticklabels=feature_names,
+    )
     plt.tight_layout()
     return fig, ax
+
 
 # def plot_impurity_importance(imp: np.ndarray, feature_names: List[str], ax):
 #     y_pos = np.arange(len(feature_names))
@@ -77,12 +91,14 @@ def plot_impurity_importance(imp: np.ndarray, feature_names: List[str]):
 
 def plot_permutation_importance(imp: np.ndarray, feature_names: List[str]):
     fig, ax = plt.subplots()
-    ax.boxplot(
-        imp, vert=False, labels=feature_names
+    ax.boxplot(imp, vert=False, labels=feature_names)
+    ax.set(
+        title="Permutation Importances (on the validation set)",
+        xlabel="Absolute Importance",
     )
-    ax.set(title="Permutation Importances (on the validation set)", xlabel="Absolute Importance")
     plt.tight_layout()
     return fig, ax
+
 
 # def plot_permutation_importance(imp: np.ndarray, feature_names: List[str], ax):
 #     ax.boxplot(
