@@ -23,10 +23,6 @@ def main():
     dataset = st.sidebar.selectbox(
         "Please select a dataset", ["Car Insurance Cold Calls"]
     )
-    # seed = st.sidebar.number_input(
-    #     "Change the seed to investigate how random effects might impact the model and explanations",
-    #     value=42,
-    # )
     np.random.seed(42)
     random_feature = st.sidebar.radio(
         "Insert a random feature to investigate its effect on the explanations",
