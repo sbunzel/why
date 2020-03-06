@@ -1,18 +1,11 @@
-import json
 from pathlib import Path
-from typing import Any, Dict
-
 import pandas as pd
 
 
-def get_config(dataset: str) -> Dict[str, Any]:
-    dataset = dataset.lower().replace(" ", "_")
-    config_path = (
-        Path(__file__).parent.parent.parent / "resources" / f"{dataset}.json"
-    ).resolve()
-    with open(config_path, mode="r") as f:
-        config = json.load(f)
-    return config
+def get_root_dir():
+    src_paths = [p for p in Path(__file__).parents if str(p.resolve()).endswith("src")]
+    assert len(src_paths) == 1, "There must be only src directory in the directory tree"
+    return src_paths[0].parent
 
 
 def get_data_summary(train: pd.DataFrame, test: pd.DataFrame, target: str) -> str:

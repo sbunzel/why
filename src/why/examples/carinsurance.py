@@ -11,8 +11,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
-from utils import read_config, get_root_dir
-
 
 class CarInsurance:
     def __init__(self, config: Dict[str, Any], datapath: Path) -> None:
@@ -175,18 +173,3 @@ class InsuranceTransformer(ColumnTransformer):
             savedir.mkdir()
         self.train_trans.to_csv(savedir / "train.csv", index=False)
         self.valid_trans.to_csv(savedir / "test.csv", index=False)
-
-
-def main():
-    config = read_config("car_insurance_cold_calls.json")
-    datapath = get_root_dir() / "data"
-    train, test = CarInsurance(config=config, datapath=datapath / "raw").prepare_data()
-    InsuranceTransformer(
-        config, train
-    ).split_train_valid().transform_train_valid().save_train_valid(
-        datapath / "processed" / "carinsurance"
-    )
-
-
-if __name__ == "__main__":
-    main()
