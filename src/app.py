@@ -2,10 +2,10 @@ import numpy as np
 import streamlit as st
 
 # from pages import home, importance, global_effects, local_effects
-import pages.home as home
-import pages.importance as importance
-import pages.global_effects as global_effects
-import pages.local_effects as local_effects
+import why.pages.home as home
+import why.pages.importance as importance
+import why.pages.global_effects as global_effects
+import why.pages.local_effects as local_effects
 
 PAGES = {
     "Home": home,
