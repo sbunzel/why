@@ -1,16 +1,15 @@
-from typing import Any, Dict
 import streamlit as st
 
 import matplotlib.pyplot as plt
 
 from why import display as display
 from why import interpret as interpret
+from why import Explainer
 
 
-def write(session: Dict[str, Any]):
+def write(exp: Explainer):
     st.title("Feature Importance")
-    m, X_valid, y_valid = session["m"], session["X_valid"], session["y_valid"]
-    feature_names = X_valid.columns
+    feature_names = exp.X_test.columns
 
     imp_types = [
         t.lower()
@@ -27,9 +26,9 @@ def write(session: Dict[str, Any]):
                     imp, names = interpret.feature_importance(
                         type,
                         feature_names,
-                        estimator=m,
-                        X=X_valid.values,
-                        y=y_valid,
+                        estimator=exp.model,
+                        X=exp.X_test.values,
+                        y=exp.y_test,
                         n_repeats=5,
                         n_jobs=-1,
                     )
@@ -38,7 +37,7 @@ def write(session: Dict[str, Any]):
                 st.pyplot()
             elif type == "impurity":
                 imp, names = interpret.feature_importance(
-                    type, feature_names, estimator=m
+                    type, feature_names, estimator=exp.model
                 )
                 fig, ax = display.plot_impurity_importance(imp, names)
                 plt.tight_layout()

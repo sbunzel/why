@@ -1,23 +1,22 @@
-from typing import Any, Dict
-
 import numpy as np
 import streamlit as st
 
 from why import display as display
 from why import interpret as interpret
+from why import Explainer
 
 
-def write(session: Dict[str, Any]):
+def write(exp: Explainer):
     st.title("Local Effects")
     dataset = st.selectbox(
         "Select dataset on which to inspect local effects", ["Test", "Train"],
     )
     if dataset == "Train":
-        X = session["X_train"]
-        preds = session["train_pred"]
+        X = exp.X_train
+        preds = exp.train_preds
     else:
-        X = session["X_valid"]
-        preds = session["valid_pred"]
+        X = exp.X_test
+        preds = exp.test_preds
     st.markdown("#### Distribution of Model Predictions")
     distribution_plot = st.empty()
     p_min, p_max = st.slider(
@@ -41,8 +40,8 @@ def write(session: Dict[str, Any]):
             "Select the number of features to show", value=3, min_value=3, max_value=10,
         )
         st.markdown(f"#### Shapley Values for the Top {n_feats} Features")
-        shap_values = interpret.shap_values(session["m"], X)
+        shap_values = interpret.shap_values(exp.model, X)
         feat_values, local_effects = interpret.shap_feature_values(
-            session["m"], X, shap_values, selected_ids, n_feats=n_feats
+            exp.model, X, shap_values, selected_ids, n_feats=n_feats
         )
         st.table(display.format_local_explanations(feat_values))

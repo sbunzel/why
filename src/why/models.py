@@ -9,6 +9,27 @@ FeatureTable = Union[pd.DataFrame, np.ndarray]
 TargetVector = Union[pd.Series, np.ndarray]
 
 
+def get_model(model_type: str):
+    """Get a model instance based on the model type selected
+    
+    Args:
+        model_type (str): The type of model to instantiate
+    
+    Raises:
+        NotImplementedError: Raise when an undefined model type is requested
+    
+    Returns:
+        [type]: A model instance
+    """
+    if model_type == "Random Forest":
+        m = RandomForestClassifier(
+            n_estimators=20, min_samples_leaf=3, max_depth=12, n_jobs=-1
+        )
+    else:
+        raise NotImplementedError(f"Model type {model_type} is not implemented.")
+    return m
+
+
 def fit_model(model_type: str, X_train: FeatureTable, y_train: TargetVector):
     """Fit a supervised model on X_train and y_train
     
@@ -38,7 +59,7 @@ def get_model_scores(
     X_valid: FeatureTable,
     y_train: TargetVector,
     y_valid: TargetVector,
-    return_performace: bool=False,
+    return_performace: bool = False,
     **kwargs,
 ) -> Tuple[pd.DataFrame, np.ndarray, np.ndarray]:
     """Generate predictions and gather common performance metrics
