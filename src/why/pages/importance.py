@@ -1,6 +1,8 @@
 from typing import Any, Dict
 import streamlit as st
 
+import matplotlib.pyplot as plt
+
 from why import display as display
 from why import interpret as interpret
 
@@ -32,10 +34,12 @@ def write(session: Dict[str, Any]):
                         n_jobs=-1,
                     )
                 fig, ax = display.plot_permutation_importance(imp, names)
+                plt.tight_layout()
                 st.pyplot()
             elif type == "impurity":
                 imp, names = interpret.feature_importance(
                     type, feature_names, estimator=m
                 )
                 fig, ax = display.plot_impurity_importance(imp, names)
+                plt.tight_layout()
                 st.pyplot()

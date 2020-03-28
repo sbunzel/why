@@ -78,15 +78,7 @@ def plot_impurity_importance(imp: np.ndarray, feature_names: List[str]):
         yticks=y_pos,
         yticklabels=feature_names,
     )
-    plt.tight_layout()
     return fig, ax
-
-
-# def plot_impurity_importance(imp: np.ndarray, feature_names: List[str], ax):
-#     y_pos = np.arange(len(feature_names))
-#     ax.barh(y_pos, imp, align="center")
-#     ax.set(title="Impurity-based Importances (on the training set)", xlabel="Absolute Importance", yticks=y_pos, yticklabels=feature_names)
-#     return ax
 
 
 def plot_permutation_importance(imp: np.ndarray, feature_names: List[str]):
@@ -96,13 +88,4 @@ def plot_permutation_importance(imp: np.ndarray, feature_names: List[str]):
         title="Permutation Importances (on the validation set)",
         xlabel="Absolute Importance",
     )
-    plt.tight_layout()
     return fig, ax
-
-
-# def plot_permutation_importance(imp: np.ndarray, feature_names: List[str], ax):
-#     ax.boxplot(
-#         imp, vert=False, labels=feature_names
-#     )
-#     ax.set(title="Permutation Importances (on the validation set)", xlabel="Absolute Importance")
-#     return ax
