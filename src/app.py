@@ -25,17 +25,18 @@ def main():
     )
 
     if dataset == "Upload my own data":
+        train_data = st.sidebar.file_uploader(
+            "Upload a training dataset in CSV format (comma separated, with headers, UTF-8)",
+            type="csv",
+        )
+        if train_data:
+            train = pd.read_csv(train_data)
         test_data = st.sidebar.file_uploader(
-            "Upload a test dataset in CSV format (',' separated, with headers, UTF-8)",
+            "Upload a test dataset in CSV format (comma separated, with headers, UTF-8)",
             type="csv",
         )
         if test_data:
             test = pd.read_csv(test_data)
-        train_data = st.sidebar.file_uploader(
-            "Upload a training dataset in CSV format", type="csv",
-        )
-        if train_data:
-            train = pd.read_csv(train_data)
         target = None
     else:
         train, test, target = data.get_data(dataset)
