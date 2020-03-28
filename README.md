@@ -32,4 +32,4 @@ Before you run the app, make sure that:
 1. You have the dataset you would like to use available in `data/raw`
 2. You have the `interpret` environment activated
 
-Then, just run `streamlit run app.py` from the root of the directory and the app will be served at `localhost:8501`.
+Then, just run `streamlit run src/app.py` from the root of the directory and the app will be served at `localhost:8501`.
