@@ -78,7 +78,7 @@ def plot_impurity_importance(imp: np.ndarray, feature_names: List[str]):
         yticks=y_pos,
         yticklabels=feature_names,
     )
-    return fig, ax
+    return fig
 
 
 def plot_permutation_importance(imp: np.ndarray, feature_names: List[str]):
@@ -88,4 +88,4 @@ def plot_permutation_importance(imp: np.ndarray, feature_names: List[str]):
         title="Permutation Importances (on the validation set)",
         xlabel="Absolute Importance",
     )
-    return fig, ax
+    return fig

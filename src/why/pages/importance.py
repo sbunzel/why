@@ -32,13 +32,13 @@ def write(exp: Explainer):
                         n_repeats=5,
                         n_jobs=-1,
                     )
-                fig, ax = display.plot_permutation_importance(imp, names)
+                fig = display.plot_permutation_importance(imp, names)
                 plt.tight_layout()
                 st.pyplot()
             elif type == "impurity":
                 imp, names = interpret.feature_importance(
                     type, feature_names, estimator=exp.model
                 )
-                fig, ax = display.plot_impurity_importance(imp, names)
+                fig = display.plot_impurity_importance(imp, names)
                 plt.tight_layout()
                 st.pyplot()
