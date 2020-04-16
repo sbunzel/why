@@ -1,10 +1,39 @@
 from typing import List, Iterable, Union, Tuple
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import shap
 from sklearn import inspection
 import streamlit as st
+
+from .explainer import Explainer
+
+
+class PermutationImportance:
+    def __init__(self, exp: Explainer, dataset="test", **kwargs) -> None:
+        self.exp = exp
+        self.dataset = dataset
+        if dataset == "train":
+            X = exp.X_train.values
+            y = exp.y_train
+        elif dataset == "test":
+            X = exp.X_test.values
+            y = exp.y_test
+        self.imp = inspection.permutation_importance(
+            estimator=exp.model, X=X, y=y, **kwargs
+        )
+
+    def plot(self, top_n: int = 15):
+        sorted_idx = self.imp.importances_mean.argsort()[-top_n:]
+        top_n_imp = self.imp.importances[sorted_idx].T
+        fig, ax = plt.subplots()
+        ax.boxplot(top_n_imp, vert=False, labels=self.exp.feature_names[sorted_idx])
+        ax.set(
+            title=f"Permutation Importances (on the {self.dataset} set)",
+            xlabel="Absolute Importance",
+        )
+        return fig
 
 
 # @st.cache
@@ -20,7 +49,9 @@ def feature_importance(type: str, feature_names: Iterable[str], **kwargs):
         sorted_idx = imp.importances_mean.argsort()[-15:]
         return imp.importances[sorted_idx].T, feature_names[sorted_idx]
     else:
-        raise NotImplementedError(f"Feature importance method {type} is not defined. Use either `impurity` or `permutation`.")
+        raise NotImplementedError(
+            f"Feature importance method {type} is not defined. Use either `impurity` or `permutation`."
+        )
 
 
 @st.cache()

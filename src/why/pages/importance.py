@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from why import display as display
 from why import interpret as interpret
 from why.explainer import Explainer
+from ..interpret import PermutationImportance
 
 
 def write(exp: Explainer):
@@ -23,18 +24,11 @@ def write(exp: Explainer):
         for i, type in enumerate(imp_types):
             if type == "permutation":
                 with st.spinner("Calculating permutation feature importances..."):
-                    imp, names = interpret.feature_importance(
-                        type,
-                        feature_names,
-                        estimator=exp.model,
-                        X=exp.X_test.values,
-                        y=exp.y_test,
-                        n_repeats=5,
-                        n_jobs=-1,
+                    fig = PermutationImportance(exp, dataset="test", n_jobs=-1).plot(
+                        top_n=15
                     )
-                fig = display.plot_permutation_importance(imp, names)
-                plt.tight_layout()
-                st.pyplot()
+                    plt.tight_layout()
+                    st.pyplot()
             elif type == "impurity":
                 imp, names = interpret.feature_importance(
                     type, feature_names, estimator=exp.model
