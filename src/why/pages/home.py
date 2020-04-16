@@ -1,7 +1,7 @@
 import streamlit as st
 
 from why import display as display
-from why import Explainer
+from why.explainer import Explainer
 
 
 def write(exp: Explainer) -> None:

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from why import display as display
 from why import interpret as interpret
-from why import Explainer
+from why.explainer import Explainer
 
 
 def write(exp: Explainer):

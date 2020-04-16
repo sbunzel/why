@@ -7,7 +7,7 @@ import why.pages.global_effects as global_effects
 import why.pages.local_effects as local_effects
 import why.data as data
 import why.models as models
-from why import Explainer
+import why.explainer as exp
 
 PAGES = {
     "Home": home,
@@ -67,7 +67,7 @@ def main():
                         key="random_feature",
                     )
                     random_feature = True if random_feature == "Yes" else False
-                    explainer = Explainer(
+                    explainer = exp.Explainer(
                         train,
                         test,
                         target,

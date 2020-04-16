@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from sklearn.inspection import plot_partial_dependence
 import streamlit as st
 
-from why import Explainer
+from why.explainer import Explainer
 
 
 def write(exp: Explainer):
