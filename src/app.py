@@ -57,7 +57,7 @@ def main():
                 mode = mode.lower().replace(" ", "_")
                 model_type = st.sidebar.selectbox(
                     "Select the model type",
-                    ["No model type selected", "Random Forest"],
+                    ["No model type selected", "Random Forest", "Upload my own model"],
                 )
                 if not model_type == "No model type selected":
                     model = models.get_model(model_type)
