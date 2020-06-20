@@ -1,5 +1,5 @@
 from pathlib import Path
-import pandas as pd
+from .explainer import Explainer
 
 
 def get_root_dir():
@@ -8,7 +8,7 @@ def get_root_dir():
     return src_paths[0].parent
 
 
-def get_data_summary(train: pd.DataFrame, test: pd.DataFrame, target: str) -> str:
-    n_rows = train.shape[0] + test.shape[0]
-    n_cols = train.shape[1] + test.shape[1]
-    return f"There are **{n_rows}** observations and **{n_cols - 1}** features in this dataset. The target variable is **{target}.**"
+def get_data_summary(exp: Explainer) -> str:
+    n_rows = exp.train.shape[0] + exp.test.shape[0]
+    n_cols = exp.train.shape[1]
+    return f"There are **{n_rows}** observations and **{n_cols - 1}** features in this dataset. The target variable is **{exp.target}.**"
