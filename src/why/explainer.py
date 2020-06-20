@@ -1,3 +1,5 @@
+from typing import Sequence, Optional
+
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
@@ -13,11 +15,13 @@ class Explainer:
         test: pd.DataFrame,
         target: str,
         model,
+        features: Optional[Sequence[str]] = None,
         mode: str = "binary_classification",
         random_feature: bool = True,
     ):
-        self.train = train
-        self.test = test
+        self.features = features if features else train.columns
+        self.train = train[self.features].copy()
+        self.test = test[self.features].copy()
         self.target = target
         self.model = model
         self.mode = mode

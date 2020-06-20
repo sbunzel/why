@@ -67,11 +67,18 @@ def main():
                         key="random_feature",
                     )
                     random_feature = True if random_feature == "Yes" else False
+                    feats_to_remove = st.sidebar.multiselect(
+                        "Select features to remove from the model",
+                        options=sorted(train.columns),
+                        default=None,
+                    )
+                    features = list(set(train.columns) - set(feats_to_remove))
                     explainer = exp.Explainer(
-                        train,
-                        test,
-                        target,
-                        model,
+                        train=train,
+                        test=test,
+                        target=target,
+                        model=model,
+                        features=features,
                         mode=mode,
                         random_feature=random_feature,
                     )
