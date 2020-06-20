@@ -6,6 +6,8 @@ import why.pages.importance as importance
 import why.pages.global_effects as global_effects
 import why.pages.local_effects as local_effects
 import why.data as data
+import why.models as models
+import why.explainer as exp
 
 PAGES = {
     "Home": home,
@@ -47,29 +49,40 @@ def main():
                 ["No target column selected"] + sorted(test.columns),
             )
         if not target == "No target column selected":
-            mode = (
-                st.sidebar.selectbox(
-                    "Select the problem type",
-                    ["No problem type selected", "Binary Classification"],
-                )
-                .lower()
-                .replace(" ", "_")
+            mode = st.sidebar.selectbox(
+                "Select the problem type",
+                ["No problem type selected", "Binary Classification"],
             )
             if not mode == "No problem type selected":
+                mode = mode.lower().replace(" ", "_")
                 model_type = st.sidebar.selectbox(
                     "Select the model type",
-                    ["No model type selected", "Random Forest"],
+                    ["No model type selected", "Random Forest", "Upload my own model"],
                 )
                 if not model_type == "No model type selected":
+                    model = models.get_model(model_type)
                     random_feature = st.sidebar.radio(
                         "Insert a random feature to investigate its effect on the explanations",
                         ["No", "Yes"],
                         key="random_feature",
                     )
                     random_feature = True if random_feature == "Yes" else False
-                    settings = {k: v for k, v in locals().items()}
-                    session = home.get_state(settings)
-                    page.write(session)
+                    feats_to_remove = st.sidebar.multiselect(
+                        "Select features to remove from the model",
+                        options=sorted(train.columns),
+                        default=None,
+                    )
+                    features = list(set(train.columns) - set(feats_to_remove))
+                    explainer = exp.Explainer(
+                        train=train,
+                        test=test,
+                        target=target,
+                        model=model,
+                        features=features,
+                        mode=mode,
+                        random_feature=random_feature,
+                    )
+                    page.write(explainer)
 
 
 if __name__ == "__main__":

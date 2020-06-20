@@ -1,10 +1,11 @@
 import pandas as pd
-import streamlit as st
+
+# import streamlit as st
 
 from .utils import get_root_dir
 
 
-@st.cache
+# @st.cache
 def get_data(dataset: str):
     if dataset == "Car Insurance Cold Calls":
         datapath = get_root_dir() / "data" / "processed" / "carinsurance"
