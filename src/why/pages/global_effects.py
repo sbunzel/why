@@ -21,8 +21,9 @@ def write(exp: Explainer):
             X = exp.X_train
         else:
             X = exp.X_test
-        plot_partial_dependence(
+        disp = plot_partial_dependence(
             exp.model, X, features=[feat], feature_names=X.columns, grid_resolution=20,
         )
+        disp.axes_[0, 0].set_ylim(0, 1)
         plt.tight_layout()
         st.pyplot()
