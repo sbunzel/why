@@ -1,28 +1,33 @@
-from typing import List, Iterable, Union, Tuple
+from typing import List, Union, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import shap
 from sklearn import inspection
+from sklearn.utils import Bunch
 import streamlit as st
 
 from .explainer import Explainer
 
 
 class PermutationImportance:
-    def __init__(self, exp: Explainer, dataset="test", **kwargs) -> None:
+    def __init__(self, exp: Explainer, dataset="test") -> None:
         self.exp = exp
         self.dataset = dataset
         if dataset == "train":
-            X = exp.X_train.values
-            y = exp.y_train
+            self.X = exp.X_train.values
+            self.y = exp.y_train
         elif dataset == "test":
-            X = exp.X_test.values
-            y = exp.y_test
-        self.imp = inspection.permutation_importance(
-            estimator=exp.model, X=X, y=y, **kwargs
+            self.X = exp.X_test.values
+            self.y = exp.y_test
+        self.imp = self.calculate_importance()
+
+    def calculate_importance(self) -> Bunch:
+        imp = inspection.permutation_importance(
+            estimator=self.exp.model, X=self.X, y=self.y, n_jobs=-1
         )
+        return imp
 
     def plot(self, top_n: int = 15):
         sorted_idx = self.imp.importances_mean.argsort()[-top_n:]
@@ -36,22 +41,31 @@ class PermutationImportance:
         return fig
 
 
-# @st.cache
-def feature_importance(type: str, feature_names: Iterable[str], **kwargs):
-    m = kwargs["estimator"]
-    if type == "impurity":
-        imp = m.feature_importances_
+class ImpurityImportance:
+    def __init__(self, exp: Explainer, dataset="test") -> None:
+        self.exp = exp
+        if dataset == "test":
+            st.info("Impurity Importance is only available on the training data.")
+        self.imp = self.calculate_importance()
+
+    def calculate_importance(self) -> Bunch:
+        imp = self.exp.model.feature_importances_
         imp = imp / len(imp)
-        sorted_idx = imp.argsort()[-15:]
-        return imp[sorted_idx], feature_names[sorted_idx]
-    elif type == "permutation":
-        imp = inspection.permutation_importance(**kwargs)
-        sorted_idx = imp.importances_mean.argsort()[-15:]
-        return imp.importances[sorted_idx].T, feature_names[sorted_idx]
-    else:
-        raise NotImplementedError(
-            f"Feature importance method {type} is not defined. Use either `impurity` or `permutation`."
+        return imp
+
+    def plot(self, top_n: int = 15):
+        sorted_idx = self.imp.argsort()[-top_n:]
+        feature_names = self.exp.feature_names[sorted_idx]
+        fig, ax = plt.subplots()
+        y_pos = np.arange(len(feature_names))
+        ax.barh(y_pos, self.imp[sorted_idx], align="center")
+        ax.set(
+            title="Impurity-based Importances (on the train set)",
+            xlabel="Normalized Importance",
+            yticks=y_pos,
+            yticklabels=feature_names,
         )
+        return fig
 
 
 @st.cache()
