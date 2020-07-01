@@ -22,14 +22,32 @@ This project builds on top of these methods and implementations to stress test a
 * Binary classification: Did the customer end up buying a car insurance or not?
 * A few, easy-to-understand features on the customers being called and previous interactions
 
-# Dependencies
+## Cervical Cancer
+* Source: [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Cervical+cancer+%28Risk+Factors%29)
+* Risk factors and biopsy results for patients tested for cervical cancer
+* Binary classification: Does the patient test positive for cervical cancer or not?
+* Features describing demographic information, habits and historic medical records
 
-You can create a new conda environment containing the required dependencies by running `conda env create -f environment.yml`
+All datasets have been pre-processed (see `src/why/examples` for the data preparation steps) and made available in `data/`.
+
+# Getting Started
+
+To set up a local development environment, please use a fresh virtual environment and run:
+
+    pip install -r requirements.txt -r requirements-dev.txt
 
 # Try it yourself
 
-Before you run the app, make sure that:
-1. You have the dataset you would like to use available in `data/raw`
-2. You have the `interpret` environment activated
+If you have set up your local development environment, just run
 
-Then, just run `streamlit run src/app.py` from the root of the directory and the app will be served at `localhost:8501`.
+    streamlit run src/app.py
+
+from the root of the directory.
+
+Or make sure that [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed and run
+
+    docker-compose up
+
+to build the project and all dependencies in a Docker container.
+
+In both cases you'll be able to access the app at `localhost:8501`.
