@@ -5,29 +5,37 @@ import numpy as np
 import pandas as pd
 import shap
 from sklearn import inspection
-from sklearn.utils import Bunch
 import streamlit as st
 
 from .explainer import Explainer
 
 
 class PermutationImportance:
-    def __init__(self, exp: Explainer, dataset="test") -> None:
+    def __init__(self, exp: Explainer) -> None:
         self.exp = exp
-        self.dataset = dataset
-        if dataset == "train":
-            self.X = exp.X_train.values
-            self.y = exp.y_train
-        elif dataset == "test":
-            self.X = exp.X_test.values
-            self.y = exp.y_test
-        self.imp = self.calculate_importance()
+        self.X = {"train": self.exp.X_train, "test": self.exp.X_test}
+        self.y = {"train": self.exp.y_train, "test": self.exp.y_test}
 
-    def calculate_importance(self) -> Bunch:
-        imp = inspection.permutation_importance(
-            estimator=self.exp.model, X=self.X, y=self.y, n_jobs=-1
+    def maybe_sample(
+        self, X: pd.DataFrame, y: pd.Series, sample_size: int = 1000
+    ) -> Tuple[pd.DataFrame, pd.Series]:
+        if X.shape[0] > sample_size:
+            ids = np.random.choice(X.index, size=sample_size, replace=False)
+        else:
+            ids = X.index
+        return X.loc[ids], y.loc[ids]
+
+    def calculate_importance(
+        self, dataset: str = "test", sample_size: int = 1000, **kwargs
+    ):
+        self.dataset = dataset
+        X, y = self.maybe_sample(
+            X=self.X[dataset], y=self.y[dataset], sample_size=sample_size
         )
-        return imp
+        self.imp = inspection.permutation_importance(
+            estimator=self.exp.model, X=X.values, y=y.values, **kwargs
+        )
+        return self
 
     def plot(self, top_n: int = 15):
         sorted_idx = self.imp.importances_mean.argsort()[-top_n:]
@@ -42,16 +50,14 @@ class PermutationImportance:
 
 
 class ImpurityImportance:
-    def __init__(self, exp: Explainer, dataset="test") -> None:
+    def __init__(self, exp: Explainer) -> None:
         self.exp = exp
+
+    def calculate_importance(self, dataset: str = "train", **kwargs):
         if dataset == "test":
             st.info("Impurity Importance is only available on the training data.")
-        self.imp = self.calculate_importance()
-
-    def calculate_importance(self) -> Bunch:
-        imp = self.exp.model.feature_importances_
-        imp = imp / len(imp)
-        return imp
+        self.imp = self.exp.model.feature_importances_
+        return self
 
     def plot(self, top_n: int = 15):
         sorted_idx = self.imp.argsort()[-top_n:]
@@ -61,14 +67,13 @@ class ImpurityImportance:
         ax.barh(y_pos, self.imp[sorted_idx], align="center")
         ax.set(
             title="Impurity-based Importances (on the train set)",
-            xlabel="Normalized Importance",
+            xlabel="Absolute Importance",
             yticks=y_pos,
             yticklabels=feature_names,
         )
         return fig
 
 
-@st.cache()
 def shap_values(model, X: pd.DataFrame) -> np.ndarray:
     explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
     return explainer.shap_values(X)

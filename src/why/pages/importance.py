@@ -22,10 +22,18 @@ def write(exp: Explainer):
         options=["train", "test"],
         format_func=lambda x: x.title(),
     )
+    scoring = st.selectbox(
+        label="Choose the metric to evaluate importance on",
+        options=["accuracy", "roc_auc", "average_precision"],
+        format_func=lambda x: x.replace("_", " ").title(),
+    )
     if imp_types:
         for imp_type in imp_types:
             with st.spinner(f"Calculating {imp_type}..."):
-                importance = getattr(interpret, imp_type)(exp=exp, dataset=dataset)
+                importance = getattr(interpret, imp_type)(exp=exp)
+                importance = importance.calculate_importance(
+                    dataset=dataset, n_jobs=-1, scoring=scoring
+                )
             fig = importance.plot(top_n=15)
             plt.tight_layout()
             st.pyplot(fig)
