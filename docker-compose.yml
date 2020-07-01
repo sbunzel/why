@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  why:
+    image: "sbunzel/why:latest"
+    build:
+      context: .
+      args:
+        PYTHON_IMAGE_TAG: 3.8-slim-buster
+    command: ""
+    ports:
+        - "8501:8501"
+    tty: true
