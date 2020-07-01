@@ -7,7 +7,7 @@ import why.pages.global_effects as global_effects
 import why.pages.local_effects as local_effects
 import why.data as data
 import why.models as models
-import why.explainer as exp
+from why import Explainer
 
 PAGES = {
     "Home": home,
@@ -23,7 +23,8 @@ def main():
 
     st.sidebar.title("Settings")
     dataset = st.sidebar.selectbox(
-        "Select a dataset", ["Car Insurance Cold Calls", "Upload my own data"]
+        "Select a dataset",
+        ["Car Insurance Cold Calls", "Cervical Cancer", "Upload my own data"],
     )
 
     if dataset == "Upload my own data":
@@ -41,7 +42,7 @@ def main():
             test = pd.read_csv(test_data)
         target = None
     else:
-        train, test, target = data.get_data(dataset)
+        train, test, target = data.load_data(dataset=dataset)
     if "train" in locals().keys() and "test" in locals().keys():
         if not target:
             target = st.sidebar.selectbox(
@@ -72,8 +73,12 @@ def main():
                         options=sorted(train.columns),
                         default=None,
                     )
-                    features = list(set(train.columns) - set(feats_to_remove))
-                    explainer = exp.Explainer(
+                    features = (
+                        list(set(train.columns) - set(feats_to_remove))
+                        if feats_to_remove
+                        else None
+                    )
+                    explainer = Explainer(
                         train=train,
                         test=test,
                         target=target,
