@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import average_precision_score, precision_recall_curve
-import seaborn as sns
 
 
 def plot_predictions(y_pred: np.ndarray, p_min: float, p_max: float) -> Tuple:
@@ -61,9 +60,8 @@ def color_by_sign(val):
 
 
 def format_local_explanations(feat_values: pd.DataFrame) -> pd.DataFrame.style:
-    cm = sns.light_palette("#90ee90", as_cmap=True)
     return feat_values.style.applymap(
         color_by_sign, subset=list(set(feat_values.columns) - set(["Prediction"]))
     ).background_gradient(
-        cmap=cm, axis="index", subset="Prediction"
+        cmap="RdYlGn", axis="index", subset="Prediction"
     )  # TODO: This should be red for small p1s
