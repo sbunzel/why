@@ -1,6 +1,6 @@
 # why
 
-_An exploration of the world of interpretable machine learning__
+_An exploration of the world of interpretable machine learning_
 
 Machine learning has become ubiquitous. Media coverage on ML's effectiveness proliferate, both in professional networks and popular media while ML experts continue to be in high demand. Online courses place education on popular ML methods at anyone's fingertips - from the basics to the cutting edge. And tools like scikit-learn or high-level interfaces to TensorFlow and PyTorch, make training a supervised model as easy as calling `.fit(X, y)`.
 
