@@ -1,0 +1,14 @@
+.git
+.idea
+.vscode
+data
+build
+dist
+*.egg-info
+venv*
+.venv
+.cache
+.pytest_cache/
+**/__pycache__
+Dockerfile
+htmlcov
