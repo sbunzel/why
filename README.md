@@ -36,9 +36,7 @@ To set up a local development environment, please use a fresh virtual environmen
 
     pip install -r requirements.txt -r requirements-dev.txt
 
-# Try it yourself
-
-If you have set up your local development environment, just run
+To try the app yoursel in your local development environment, run
 
     streamlit run src/app.py
 
@@ -48,6 +46,4 @@ Or make sure that [Docker](https://docs.docker.com/install/) and [Docker Compose
 
     docker-compose up
 
-to build the project and all dependencies in a Docker container.
-
-In both cases you'll be able to access the app at `localhost:8501`.
+to build the project and all dependencies in a Docker container. In both cases you'll be able to access the app at `localhost:8501`.
