@@ -9,6 +9,18 @@ __all__ = ["load_data"]
 def load_data(
     dataset: str, data_home: Optional[Union[Path, str]] = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, str]:
+    """Load prepared train and test datasets from the why GitHub repo.
+
+    Args:
+        dataset (str): The name of the dataset to load.
+        data_home (Optional[Union[Path, str]], optional): The download and cache folder for the datasets. By default all data is store in `~/why_data` subfolders.
+
+    Raises:
+        NotImplementedError: Raise when a dataset is requested that is not available in the repo.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame, str]: A tuple of the train and test data as pd.DataFrames and the name of the target column.
+    """
     TARGET_COLS = {
         "Car Insurance Cold Calls": "CarInsurance",
         "Cervical Cancer": "Biopsy",

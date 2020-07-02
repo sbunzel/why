@@ -9,6 +9,8 @@ import streamlit as st
 
 from .explainer import Explainer
 
+__all__ = ["PermutationImportance", "ImpurityImportance"]
+
 
 class PermutationImportance:
     def __init__(self, exp: Explainer) -> None:

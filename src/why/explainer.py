@@ -9,6 +9,8 @@ __all__ = ["Explainer"]
 
 
 class Explainer:
+    """The core data container holding state shared across analyses."""
+
     def __init__(
         self,
         train: pd.DataFrame,
@@ -62,3 +64,8 @@ class Explainer:
             raise NotImplementedError(
                 f"Problem type {self.mode} has not been implemented yet."
             )
+
+    def get_data_summary(self) -> str:
+        n_rows = self.train.shape[0] + self.test.shape[0]
+        n_cols = self.train.shape[1]
+        return f"There are **{n_rows}** observations and **{n_cols - 1}** features in this dataset. The target variable is **{self.target}.**"
