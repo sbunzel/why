@@ -5,6 +5,12 @@ from sklearn.impute import SimpleImputer
 
 
 def load_cervical_cancer() -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Collect and prepare the cervical cancer risk factors data set from the UCI Machine Learning Repository.
+    A description of the dataset is available here: https://archive.ics.uci.edu/ml/datasets/Cervical+cancer+%28Risk+Factors%29
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame]: The training and test data.
+    """
     COLS = [
         "Age",
         "Number of sexual partners",
