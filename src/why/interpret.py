@@ -1,4 +1,4 @@
-from typing import List, Union, Tuple
+from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +9,7 @@ import streamlit as st
 
 from .explainer import Explainer
 
-__all__ = ["PermutationImportance", "ImpurityImportance"]
+__all__ = ["PermutationImportance", "ImpurityImportance", "ShapFeatures"]
 
 
 class PermutationImportance:
@@ -18,22 +18,12 @@ class PermutationImportance:
         self.X = {"train": self.exp.X_train, "test": self.exp.X_test}
         self.y = {"train": self.exp.y_train, "test": self.exp.y_test}
 
-    def maybe_sample(
-        self, X: pd.DataFrame, y: pd.Series, sample_size: int = 1000
-    ) -> Tuple[pd.DataFrame, pd.Series]:
-        if X.shape[0] > sample_size:
-            ids = np.random.choice(X.index, size=sample_size, replace=False)
-        else:
-            ids = X.index
-        return X.loc[ids], y.loc[ids]
-
     def calculate_importance(
         self, dataset: str = "test", sample_size: int = 1000, **kwargs
     ):
         self.dataset = dataset
-        X, y = self.maybe_sample(
-            X=self.X[dataset], y=self.y[dataset], sample_size=sample_size
-        )
+        X = _maybe_sample(input=self.X[dataset], sample_size=sample_size)
+        y = _maybe_sample(input=self.y[dataset], sample_size=sample_size)
         self.imp = inspection.permutation_importance(
             estimator=self.exp.model, X=X.values, y=y.values, **kwargs
         )
@@ -76,38 +66,62 @@ class ImpurityImportance:
         return fig
 
 
-def shap_values(model, X: pd.DataFrame) -> np.ndarray:
-    explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
-    return explainer.shap_values(X)
+class ShapFeatures:
+    def __init__(self, exp: Explainer, dataset: str) -> None:
+        self.exp = exp
+        self.dataset = dataset
+        if self.dataset == "train":
+            self.X = self.exp.X_train
+        else:
+            self.X = self.exp.X_test
 
+    def calculate_shapley_values(self):
+        # background_sample = _maybe_sample(self.exp.X_test, sample_size=200)
+        explainer = shap.TreeExplainer(
+            model=self.exp.model, feature_perturbation="tree_path_dependent"
+        )
+        self.shaps = explainer.shap_values(self.X)
+        return self
 
-def shap_feature_values(
-    model,
-    X: pd.DataFrame,
-    shap_values: np.ndarray,
-    ids: Union[np.ndarray, List[int]],
-    n_feats: int = 5,
-) -> Tuple[pd.DataFrame, np.ndarray]:
-    # TODO: Handle case when zero samples where selected gracefully
-    top_feat_ids = np.argsort(np.abs(shap_values[1][ids, :]))[:, ::-1][:, :n_feats]
-    sample_p1s = np.round(model.predict_proba(X.iloc[ids, :])[:, 1], 4)
-    sample_shaps = np.array(
-        [ar[feats] for ar, feats in zip(shap_values[1][ids], top_feat_ids)]
-    )
-
-    sample_feature_values = np.array(
-        [
-            [
-                f"{c} = {v} ( {s:+.2f} )"
-                for (c, v), s in zip(X.iloc[sample, feats].iteritems(), shaps)
+    def combine_top_features(self, ids: np.ndarray, n_feats: int = 5) -> pd.DataFrame:
+        if len(ids) > 0:
+            top_feat_ids = np.argsort(np.abs(self.shaps[1][ids, :]))[:, ::-1][
+                :, :n_feats
             ]
-            for sample, feats, shaps in zip(ids, top_feat_ids, sample_shaps)
-        ]
-    )
-    top_n_feats = [f"Feature {i+1}" for i in range(n_feats)]
-    feat_values = (
-        pd.DataFrame(sample_feature_values, columns=top_n_feats)
-        .assign(Prediction=sample_p1s)
-        .sort_values("Prediction", ascending=False)
-    )
-    return feat_values, sample_shaps
+            sample_p1s = np.round(
+                self.exp.model.predict_proba(self.X.iloc[ids, :])[:, 1], 4
+            )
+            sample_shaps = np.array(
+                [ar[feats] for ar, feats in zip(self.shaps[1][ids], top_feat_ids)]
+            )
+
+            sample_feature_values = np.array(
+                [
+                    [
+                        f"{c} = {v} ( {s:+.2f} )"
+                        for (c, v), s in zip(
+                            self.X.iloc[sample, feats].iteritems(), shaps
+                        )
+                    ]
+                    for sample, feats, shaps in zip(ids, top_feat_ids, sample_shaps)
+                ]
+            )
+            top_n_feats = [f"Feature {i+1}" for i in range(n_feats)]
+            feat_values = (
+                pd.DataFrame(sample_feature_values, columns=top_n_feats)
+                .assign(Prediction=sample_p1s)
+                .sort_values("Prediction", ascending=False)
+            )
+        else:
+            feat_values = pd.DataFrame(columns=["Prediction"])
+        return feat_values
+
+
+def _maybe_sample(
+    input: Union[pd.DataFrame, pd.Series], sample_size: int = 1000
+) -> Union[pd.DataFrame, pd.Series]:
+    if input.shape[0] > sample_size:
+        ids = np.random.choice(input.index, size=sample_size, replace=False)
+    else:
+        ids = input.index
+    return input.loc[ids]
