@@ -46,18 +46,42 @@ def load_data(
 def _build_data_path(
     dataset: str, data_home: Optional[Union[Path, str]] = None
 ) -> Path:
+    """Creates a path to cache data in, either in the standard directory ~/why_data or in the provided directory.
+
+    Args:
+        dataset (str): Name of the dataset to create a data path for.
+        data_home (Optional[Union[Path, str]], optional): Home directory to create data paths in. Defaults to None.
+
+    Returns:
+        Path: The path to save cached data to.
+    """
     return (
         Path(data_home) / dataset if data_home else Path.home() / "why_data" / dataset
     )
 
 
-def _read_train_test(data_path: Path):
+def _read_train_test(data_path: Path) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Reads cached train and test data.
+
+    Args:
+        data_path (Path): Path to folder to read the data from.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame]: Tuple of train_df and test_df.
+    """
     train = pd.read_csv(data_path / "train.csv")
     test = pd.read_csv(data_path / "test.csv")
     return train, test
 
 
 def _write_train_test(data_path: Path, train: pd.DataFrame, test: pd.DataFrame) -> None:
+    """Writes the train and test data to the cache directory.
+
+    Args:
+        data_path (Path): Path to use for caching.
+        train (pd.DataFrame): Training DataFrame.
+        test (pd.DataFrame): Testing DataFrame.
+    """
     if not data_path.parent.is_dir():
         data_path.parent.mkdir()
     data_path.mkdir(exist_ok=True)
