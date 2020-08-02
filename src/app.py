@@ -1,12 +1,8 @@
 import pandas as pd
 import streamlit as st
 
-import why.pages.home as home
-import why.pages.importance as importance
-import why.pages.global_effects as global_effects
-import why.pages.local_effects as local_effects
-import why.data as data
-import why.models as models
+from why.pages import global_effects, home, importance, local_effects
+from why import data, models
 from why import Explainer
 
 PAGES = {

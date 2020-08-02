@@ -1,6 +1,6 @@
 import streamlit as st
 
-from why import display as display
+from why import display
 from why import Explainer
 
 
@@ -16,4 +16,4 @@ def write(exp: Explainer) -> None:
     fig = display.plot_precision_recall_curve(
         exp.y_train, exp.y_test, exp.train_preds, exp.test_preds,
     )
-    st.pyplot()
+    st.pyplot(fig)

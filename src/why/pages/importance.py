@@ -2,8 +2,8 @@ import streamlit as st
 
 import matplotlib.pyplot as plt
 
-from why import interpret as interpret
-from why.explainer import Explainer
+from why import interpret
+from why import Explainer
 
 
 def write(exp: Explainer):
