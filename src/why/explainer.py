@@ -75,7 +75,7 @@ class Explainer:
                 )
 
     def check_data_types(self) -> None:
-        """Checks that the data types of training and test data are compatible and that all features are of type float to facilitate integration with scikit-learn."""
+        """Checks that the data types of training and test data are compatible and that all features are of numeric dtype to facilitate integration with scikit-learn."""
         diffs_dtypes = [
             {a: self.train[a].dtype, b: self.test[a].dtype}
             for a, b in zip(self.train.columns, self.test.columns)
@@ -85,14 +85,14 @@ class Explainer:
             raise ValueError(
                 f"Train and test are expected to have the same schema. Incompatible data types: {diffs_dtypes}."
             )
-        non_float_cols = [
+        non_numeric_cols = [
             {col: self.test[col].dtype}
             for col in set(self.features) - set([self.target])
-            if not pd.api.types.is_float_dtype(self.test[col])
+            if not pd.api.types.is_numeric_dtype(self.test[col])
         ]
-        if non_float_cols:
+        if non_numeric_cols:
             raise ValueError(
-                f"All feature columns are expected to be float dtype. Columns {non_float_cols} are not."
+                f"All feature columns are expected to be numeric dtype. Columns {non_numeric_cols} are not."
             )
 
     def prepare_data(self) -> None:
