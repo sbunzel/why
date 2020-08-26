@@ -1,13 +1,15 @@
+import numpy as np
 import pandas as pd
 import streamlit as st
 
-from why.pages import global_effects, home, importance, local_effects
+from why.pages import correlation, global_effects, home, importance, local_effects
 from why import data, models
 from why import Explainer
 
 PAGES = {
     "Home": home,
     "Feature Importance": importance,
+    "Feature Correlation": correlation,
     "Global Effects": global_effects,
     "Local Effects": local_effects,
 }
@@ -74,6 +76,14 @@ def main():
                         if feats_to_remove
                         else None
                     )
+                    seed = st.sidebar.number_input(
+                        label="Update the random seed",
+                        min_value=1,
+                        max_value=100,
+                        value=42,
+                        step=1,
+                    )
+                    np.random.seed(seed)
                     explainer = Explainer(
                         train=train,
                         test=test,

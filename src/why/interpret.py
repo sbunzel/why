@@ -1,15 +1,24 @@
 from typing import Union
 
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
+from scipy.cluster import hierarchy
 import shap
 from sklearn import inspection
+from sklearn.base import BaseEstimator
+from sklearn.utils import Bunch
 import streamlit as st
 
 from .explainer import Explainer
 
-__all__ = ["PermutationImportance", "ImpurityImportance", "ShapFeatures"]
+__all__ = [
+    "PermutationImportance",
+    "ImpurityImportance",
+    "ShapFeatures",
+    "FeatureCorrelation",
+]
 
 
 class PermutationImportance:
@@ -18,14 +27,10 @@ class PermutationImportance:
         self.X = {"train": self.exp.X_train, "test": self.exp.X_test}
         self.y = {"train": self.exp.y_train, "test": self.exp.y_test}
 
-    def calculate_importance(
-        self, dataset: str = "test", sample_size: int = 1000, **kwargs
-    ):
+    def calculate_importance(self, dataset: str = "test", **kwargs):
         self.dataset = dataset
-        X = _maybe_sample(input=self.X[dataset], sample_size=sample_size)
-        y = _maybe_sample(input=self.y[dataset], sample_size=sample_size)
-        self.imp = inspection.permutation_importance(
-            estimator=self.exp.model, X=X.values, y=y.values, **kwargs
+        self.imp = self._permutation_importance(
+            estimator=self.exp.model, X=self.X[dataset], y=self.y[dataset], **kwargs
         )
         return self
 
@@ -39,6 +44,21 @@ class PermutationImportance:
             xlabel="Absolute Importance",
         )
         return fig
+
+    @staticmethod
+    # TODO: Look into how to cache this calculation
+    def _permutation_importance(
+        estimator: BaseEstimator,
+        X: pd.DataFrame,
+        y: pd.DataFrame,
+        scoring: str,
+        sample_size: int,
+    ) -> Bunch:
+        X = _maybe_sample(input=X, sample_size=sample_size).values
+        y = _maybe_sample(input=y, sample_size=sample_size).values
+        return inspection.permutation_importance(
+            estimator=estimator, X=X, y=y, scoring=scoring, n_jobs=-1
+        )
 
 
 class ImpurityImportance:
@@ -117,11 +137,36 @@ class ShapFeatures:
         return feat_values
 
 
+class FeatureCorrelation:
+    def __init__(self, exp: Explainer) -> None:
+        self.exp = exp
+
+    # TODO: Look into how to cache this calculation
+    def calculate_correlation(self, method: str = "spearman", sample_size: int = 1000):
+        X = _maybe_sample(self.exp.X_train, sample_size)
+        self.corr = X.corr(method=method)
+        return self
+
+    def plot_dendrogram(self) -> Figure:
+        corr_linkage = hierarchy.ward(self.corr)
+        fig, ax = plt.subplots()
+        _ = hierarchy.dendrogram(
+            Z=corr_linkage,
+            orientation="right",
+            labels=list(self.exp.feature_names),
+            ax=ax,
+        )
+        ax.set(
+            title="Dendrogram of Feature Correlation Clusters", xlabel="Distance",
+        )
+        return fig
+
+
 def _maybe_sample(
     input: Union[pd.DataFrame, pd.Series], sample_size: int = 1000
 ) -> Union[pd.DataFrame, pd.Series]:
     if input.shape[0] > sample_size:
-        ids = np.random.choice(input.index, size=sample_size, replace=False)
+        ids = np.random.choice(input.index, size=sample_size, replace=False,)
     else:
         ids = input.index
     return input.loc[ids]
