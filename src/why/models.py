@@ -24,7 +24,11 @@ def get_model(model_type: str) -> BaseEstimator:
     """
     if model_type == "Random Forest":
         m = RandomForestClassifier(
-            n_estimators=20, min_samples_leaf=3, max_depth=12, n_jobs=-1
+            n_estimators=20,
+            min_samples_leaf=3,
+            max_depth=12,
+            n_jobs=-1,
+            # random_state=42,
         )
     else:
         raise NotImplementedError(f"Model type {model_type} is not implemented.")

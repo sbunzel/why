@@ -33,46 +33,17 @@ class Explainer:
         random_feature: bool = True,
     ):
         self.check_column_names(train, test)
+
         self.features = features if features else train.columns
         self.train = train[self.features].copy()
         self.test = test[self.features].copy()
         self.target = target
         self.model = model
         self.mode = mode
+        self.random_feature = random_feature
 
         self.check_data_types()
-        if random_feature:
-            self.train = self.insert_random_num(self.train)
-            self.test = self.insert_random_num(self.test)
-        self.prepare_data()
-        self.maybe_fit_model()
-        self.get_predictions()
-        self.feature_names = self.train.columns
-
-    @staticmethod
-    def check_column_names(train: pd.DataFrame, test: pd.DataFrame) -> None:
-        """Checks that train and test have the same columns.
-        This implementation assumes that the column order is important. This assumption could be relaxed in the future.
-
-        Args:
-            train (pd.DataFrame): The training data provided.
-            test (pd.DataFrame): The test data provided.
-
-        Raises:
-            ValueError: Raise if train and test have incompabitle shapes of column names.
-        """
-        if not train.shape[1] == test.shape[1]:
-            raise ValueError(
-                "Train and test are expected to have the same number of columns."
-            )
-        else:
-            diffs_column_names = [
-                (a, b) for a, b in zip(train.columns, test.columns) if a != b
-            ]
-            if diffs_column_names:
-                raise ValueError(
-                    f"Train and test are expected to have the same column names. Incompatible column names: {diffs_column_names}."
-                )
+        self.add_properties()
 
     def check_data_types(self) -> None:
         """Checks that the data types of training and test data are compatible and that all features are of numeric dtype to facilitate integration with scikit-learn."""
@@ -95,7 +66,16 @@ class Explainer:
                 f"All feature columns are expected to be numeric dtype. Columns {non_numeric_cols} are not."
             )
 
-    def prepare_data(self) -> None:
+    def add_properties(self):
+        if self.random_feature:
+            self.train = self.insert_random_num(self.train)
+            self.test = self.insert_random_num(self.test)
+        self.prepare_data()
+        self.maybe_fit_model()
+        self.get_predictions()
+        self.feature_names = self.X_train.columns
+
+    def prepare_data(self):
         """Splits the training and test data into feature matrix and target vector."""
         self.X_train, self.y_train = (
             self.train.drop(columns=self.target),
@@ -136,6 +116,31 @@ class Explainer:
         n_rows = self.train.shape[0] + self.test.shape[0]
         n_cols = self.train.shape[1]
         return f"There are **{n_rows}** observations and **{n_cols - 1}** features in this dataset. The target variable is **{self.target}.**"
+
+    @staticmethod
+    def check_column_names(train: pd.DataFrame, test: pd.DataFrame) -> None:
+        """Checks that train and test have the same columns.
+        This implementation assumes that the column order is important. This assumption could be relaxed in the future.
+
+        Args:
+            train (pd.DataFrame): The training data provided.
+            test (pd.DataFrame): The test data provided.
+
+        Raises:
+            ValueError: Raise if train and test have incompabitle shapes of column names.
+        """
+        if not train.shape[1] == test.shape[1]:
+            raise ValueError(
+                "Train and test are expected to have the same number of columns."
+            )
+        else:
+            diffs_column_names = [
+                (a, b) for a, b in zip(train.columns, test.columns) if a != b
+            ]
+            if diffs_column_names:
+                raise ValueError(
+                    f"Train and test are expected to have the same column names. Incompatible column names: {diffs_column_names}."
+                )
 
     @staticmethod
     def insert_random_num(df: pd.DataFrame, copy=False) -> pd.DataFrame:

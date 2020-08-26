@@ -32,7 +32,7 @@ def write(exp: Explainer):
             with st.spinner(f"Calculating {imp_type}..."):
                 importance = getattr(interpret, imp_type)(exp=exp)
                 importance = importance.calculate_importance(
-                    dataset=dataset, n_jobs=-1, scoring=scoring
+                    dataset=dataset, scoring=scoring, sample_size=1000
                 )
             fig = importance.plot(top_n=15)
             plt.tight_layout()
