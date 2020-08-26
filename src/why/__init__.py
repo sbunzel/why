@@ -1,3 +1,3 @@
-from .interpret import Explainer
+from .explainer import Explainer
 
 __all__ = ["Explainer"]
