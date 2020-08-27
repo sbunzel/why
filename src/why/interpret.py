@@ -9,6 +9,7 @@ import shap
 from sklearn import inspection
 from sklearn.base import BaseEstimator
 from sklearn.utils import Bunch
+from stratx import partdep
 import streamlit as st
 
 from .explainer import Explainer
@@ -158,6 +159,52 @@ class FeatureCorrelation:
         )
         ax.set(
             title="Dendrogram of Feature Correlation Clusters", xlabel="Distance",
+        )
+        return fig
+
+
+class ModelDependentPD:
+    def __init__(self, exp: Explainer) -> None:
+        self.exp = exp
+
+    def plot(self, dataset: str, feature: str) -> Figure:
+        if dataset == "train":
+            X = self.exp.X_train
+            # y = self.exp.y_train
+        else:
+            X = self.exp.X_test
+            # y = self.exp.y_test
+        disp = inspection.plot_partial_dependence(
+            self.exp.model,
+            X,
+            features=[feature],
+            feature_names=X.columns,
+            grid_resolution=20,
+            n_jobs=-1,
+        )
+        disp.axes_[0, 0].set(title="Model-dependent Partial Dependence", ylim=(0, 1))
+        return disp.figure_
+
+
+class ModelIndependentPD:
+    def __init__(self, exp: Explainer) -> None:
+        self.exp = exp
+
+    def plot(self, dataset: str, feature: str) -> Figure:
+        if dataset == "train":
+            X = self.exp.X_train
+            y = self.exp.y_train
+        else:
+            X = self.exp.X_test
+            y = self.exp.y_test
+        pdpx, pdpy, _ = partdep.plot_stratpd(X, y, feature, self.exp.target)
+        fig, ax = plt.subplots()
+        ax.plot(pdpx, pdpy)
+        ax.set(
+            title="Model-independent Partial Dependence (stratx)",
+            xlabel=feature,
+            ylabel="Partial dependence",
+            ylim=(0, 1),
         )
         return fig
 

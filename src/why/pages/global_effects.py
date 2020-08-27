@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
-from sklearn.inspection import plot_partial_dependence
 import streamlit as st
 
-from why import Explainer
+from why import Explainer, interpret
 
 
 def write(exp: Explainer):
@@ -13,17 +12,22 @@ def write(exp: Explainer):
         ["Don't plot partial dependence"] + sorted(exp.X_train.columns),
     )
     if not feat == "Don't plot partial dependence":
+        pdp_types = [
+            e.replace(" ", "")
+            for e in st.multiselect(
+                "Which partial dependence method would you like to use?",
+                options=["Model Dependent PD", "Model Independent PD"],
+                default=None,
+            )
+        ]
         dataset = st.selectbox(
             "Please select dataset on which to calculate partial depedence",
-            ["Test", "Train"],
+            ["test", "train"],
+            format_func=lambda x: x.title(),
         )
-        if dataset == "Train":
-            X = exp.X_train
-        else:
-            X = exp.X_test
-        disp = plot_partial_dependence(
-            exp.model, X, features=[feat], feature_names=X.columns, grid_resolution=20,
-        )
-        disp.axes_[0, 0].set_ylim(0, 1)
-        plt.tight_layout()
-        st.pyplot()
+
+        for pdp_type in pdp_types:
+            pdp = getattr(interpret, pdp_type)(exp=exp)
+            fig = pdp.plot(dataset=dataset, feature=feat)
+            plt.tight_layout()
+            st.pyplot(fig)
