@@ -102,6 +102,9 @@ class Explainer:
         if self.mode == "binary_classification":
             self.train_preds = self.model.predict_proba(self.X_train)[:, 1]
             self.test_preds = self.model.predict_proba(self.X_test)[:, 1]
+        elif self.mode == "multi_class_classification":
+            self.train_preds = self.model.predict_proba(self.X_train)
+            self.test_preds = self.model.predict_proba(self.X_test)
         else:
             raise NotImplementedError(
                 f"Problem type {self.mode} has not been implemented yet."

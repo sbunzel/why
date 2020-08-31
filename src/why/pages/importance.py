@@ -5,6 +5,11 @@ import matplotlib.pyplot as plt
 from why import interpret
 from why import Explainer
 
+SCORING_OPTIONS = {
+    "binary_classification": ["accuracy", "roc_auc", "average_precision"],
+    "multi_class_classification": ["accuracy"],
+}
+
 
 def write(exp: Explainer):
     st.title("Feature Importance")
@@ -24,7 +29,7 @@ def write(exp: Explainer):
     )
     scoring = st.selectbox(
         label="Choose the metric to evaluate importance on",
-        options=["accuracy", "roc_auc", "average_precision"],
+        options=SCORING_OPTIONS[exp.mode],
         format_func=lambda x: x.replace("_", " ").title(),
     )
     if imp_types:

@@ -7,6 +7,13 @@ from why import Explainer, interpret
 def write(exp: Explainer):
     st.title("Global Effects")
     st.markdown("#### Partial Dependence of Predictions on a Feature")
+    if exp.mode == "multi_class_classification":
+        pdp_target = st.selectbox(
+            "Please select the target class for which to compute PDP",
+            sorted(exp.model.classes_),
+        )
+    else:
+        pdp_target = None
     feat = st.selectbox(
         "Please select a feature",
         ["Don't plot partial dependence"] + sorted(exp.X_train.columns),
@@ -27,7 +34,12 @@ def write(exp: Explainer):
         )
 
         for pdp_type in pdp_types:
-            pdp = getattr(interpret, pdp_type)(exp=exp)
-            fig = pdp.plot(dataset=dataset, feature=feat)
-            plt.tight_layout()
-            st.pyplot(fig)
+            if pdp_type == "ModelDependentPD" or exp.mode == "binary_classification":
+                pdp = getattr(interpret, pdp_type)(exp=exp)
+                fig = pdp.plot(dataset=dataset, feature=feat, target=pdp_target)
+                plt.tight_layout()
+                st.pyplot(fig)
+            else:
+                st.warning(
+                    f"'{pdp_type}' has not been implemented for mode '{exp.mode}' yet."
+                )

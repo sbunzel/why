@@ -57,7 +57,11 @@ def main():
         if not target == "No target column selected":
             mode = st.sidebar.selectbox(
                 "Select the problem type",
-                ["No problem type selected", "Binary Classification"],
+                [
+                    "No problem type selected",
+                    "Binary Classification",
+                    "Multi Class Classification",
+                ],
             )
             if not mode == "No problem type selected":
                 mode = mode.lower().replace(" ", "_")

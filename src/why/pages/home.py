@@ -1,7 +1,13 @@
+from matplotlib.figure import Figure
 import streamlit as st
 
-from why import display
 from why import Explainer
+from why.evaluate import BinaryClassEvaluator, MultiClassEvaluator
+
+EVALUATORS = {
+    "binary_classification": BinaryClassEvaluator,
+    "multi_class_classification": MultiClassEvaluator,
+}
 
 
 def write(exp: Explainer) -> None:
@@ -13,7 +19,14 @@ def write(exp: Explainer) -> None:
     st.dataframe(exp.test.head(100), height=300)
 
     st.markdown("## Model Performance")
-    fig = display.plot_precision_recall_curve(
-        exp.y_train, exp.y_test, exp.train_preds, exp.test_preds,
+    evaluator = EVALUATORS[exp.mode](exp)
+    method = st.selectbox(
+        "Select evaluation method",
+        evaluator.methods,
+        format_func=lambda x: x.replace("_", " ").title(),
     )
-    st.pyplot(fig)
+    evaluation = getattr(evaluator, method)()
+    if isinstance(evaluation, Figure):
+        st.pyplot(evaluation)
+    else:
+        st.write(evaluation)

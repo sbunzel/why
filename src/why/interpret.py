@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -145,17 +145,17 @@ class FeatureCorrelation:
     # TODO: Look into how to cache this calculation
     def calculate_correlation(self, method: str = "spearman", sample_size: int = 1000):
         X = _maybe_sample(self.exp.X_train, sample_size)
-        self.corr = X.corr(method=method)
+        # Remove columns which are always zero
+        n_zeros = (X != 0).sum(axis=0)
+        self.non_zero_cols = n_zeros[n_zeros > 0].index
+        self.corr = X.loc[:, self.non_zero_cols].corr(method=method)
         return self
 
     def plot_dendrogram(self) -> Figure:
         corr_linkage = hierarchy.ward(self.corr)
         fig, ax = plt.subplots()
         _ = hierarchy.dendrogram(
-            Z=corr_linkage,
-            orientation="right",
-            labels=list(self.exp.feature_names),
-            ax=ax,
+            Z=corr_linkage, orientation="right", labels=list(self.non_zero_cols), ax=ax,
         )
         ax.set(
             title="Dendrogram of Feature Correlation Clusters", xlabel="Distance",
@@ -167,22 +167,32 @@ class ModelDependentPD:
     def __init__(self, exp: Explainer) -> None:
         self.exp = exp
 
-    def plot(self, dataset: str, feature: str) -> Figure:
+    def plot(
+        self, dataset: str, feature: str, target: Optional[Union[int, str]] = None
+    ) -> Figure:
         if dataset == "train":
             X = self.exp.X_train
-            # y = self.exp.y_train
+            y_pred = self.exp.train_preds
         else:
             X = self.exp.X_test
-            # y = self.exp.y_test
+            y_pred = self.exp.test_preds
         disp = inspection.plot_partial_dependence(
             self.exp.model,
             X,
             features=[feature],
             feature_names=X.columns,
+            target=target,
             grid_resolution=20,
             n_jobs=-1,
         )
-        disp.axes_[0, 0].set(title="Model-dependent Partial Dependence", ylim=(0, 1))
+        plot_title = "Model-dependent Partial Dependence"
+        if target:
+            plot_title += f" for Target '{target}'"
+            target_id = np.argwhere(self.exp.model.classes_ == target)[0][0]
+            ylim = (y_pred[target_id].min(), y_pred[target_id].max())
+        else:
+            ylim = (y_pred.min(), y_pred.max())
+        disp.axes_[0, 0].set(title=plot_title, ylim=ylim)
         return disp.figure_
 
 
@@ -190,7 +200,7 @@ class ModelIndependentPD:
     def __init__(self, exp: Explainer) -> None:
         self.exp = exp
 
-    def plot(self, dataset: str, feature: str) -> Figure:
+    def plot(self, dataset: str, feature: str, **kwargs) -> Figure:
         if dataset == "train":
             X = self.exp.X_train
             y = self.exp.y_train
