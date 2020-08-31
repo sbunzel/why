@@ -4,7 +4,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
-from sklearn.metrics import average_precision_score, precision_recall_curve
 
 
 def plot_predictions(y_pred: np.ndarray, p_min: float, p_max: float) -> Figure:
@@ -30,36 +29,6 @@ def plot_predictions(y_pred: np.ndarray, p_min: float, p_max: float) -> Figure:
     return fig
 
 
-def plot_precision_recall_curve(
-    y_train: np.ndarray,
-    y_test: np.ndarray,
-    train_pred: np.ndarray,
-    test_pred: np.ndarray,
-) -> Figure:
-    """Calculates and plots the precision recall curve for as set of training and test set predictions.
-
-    Args:
-        y_train (np.ndarray): True y for the training set.
-        y_test (np.ndarray): True y for the test set.
-        train_pred (np.ndarray): Predictions for the training set.
-        test_pred (np.ndarray): Predictions for the test set.
-
-    Returns:
-        Figure: Matplotlib figure of train and test precision recall curves.
-    """
-    train_pr, train_rc, _ = precision_recall_curve(y_train, train_pred)
-    train_ap = average_precision_score(y_train, train_pred)
-    test_pr, test_rc, _ = precision_recall_curve(y_test, test_pred)
-    test_ap = average_precision_score(y_test, test_pred)
-
-    fig, ax = plt.subplots()
-    ax.plot(train_rc, train_pr, label=f"Train Average Precision = {train_ap:.2f}")
-    ax.plot(test_rc, test_pr, label=f"Test Average Precision = {test_ap:.2f}")
-    ax.set(title="Precision-Recall Curve", xlabel="Recall", ylabel="Precision")
-    plt.legend()
-    return fig
-
-
 def style_local_explanations(
     feat_values: pd.DataFrame, min_pred: float = 0.0, max_pred: float = 1.0
 ) -> pd.DataFrame:
@@ -74,7 +43,7 @@ def style_local_explanations(
     return feat_values.style.applymap(
         _color_by_sign, subset=list(set(feat_values.columns) - set(["Prediction"]))
     ).background_gradient(
-        cmap="RdYlGn", axis="index", subset="Prediction", vmin=min_pred, vmax=max_pred
+        cmap="RdYlBu", axis="index", subset="Prediction", vmin=min_pred, vmax=max_pred
     )
 
 
