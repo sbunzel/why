@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import streamlit as st
 
 from why import display, interpret
@@ -17,7 +18,6 @@ def write(exp: Explainer):
             preds = exp.train_preds
         else:
             preds = exp.test_preds
-        st.markdown("#### Distribution of Model Predictions")
         distribution_plot = st.empty()
         min_value = float(
             round(preds.max() - max((preds.max() - preds.min()) / 10, 0.05), 2)
@@ -31,8 +31,9 @@ def write(exp: Explainer):
             value=(min_value, max_value),
             step=0.01,
         )
-        fig = display.plot_predictions(preds, p_min, p_max)
-        distribution_plot.pyplot(fig)
+        pred_df = pd.DataFrame(data={"target": 1, "prediction": preds})
+        chart = display.plot_predictions(df=pred_df, p_min=p_min, p_max=p_max)
+        distribution_plot.altair_chart(chart, use_container_width=True)
 
         selected_ids = np.where(np.logical_and(preds >= p_min, preds <= p_max))[0]
 

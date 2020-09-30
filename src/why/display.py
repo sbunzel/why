@@ -1,32 +1,34 @@
 import re
-
+from typing import Optional
+import altair as alt
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-import numpy as np
 
 
-def plot_predictions(y_pred: np.ndarray, p_min: float, p_max: float) -> Figure:
-    """Plots model predictions as a histogram and highlight predictions in a selected range.
-    
-    Args:
-        y_pred (np.ndarray): Array of predictions.
-        p_min (float): Lower boundary of predictions to highlight.
-        p_max (float): Upper boundary of predictions to highlight.
-    
-    Returns:
-        Figure: Matplotlib figure of prediction histogram.
-    """
-    fig, ax = plt.subplots()
-    ax.hist(y_pred, bins=100, color="grey")
-    for i, r in enumerate(ax.patches):
-        if p_min <= r.get_x() <= p_max:
-            ax.patches[i].set_color("#90ee90")
-    ax.set_title("Model Prediction")
-    ax.set_xlabel("Predicted probability of class 1")
-    ax.set_ylabel("Number of predictions")
-    plt.tight_layout()
-    return fig
+def plot_predictions(df: pd.DataFrame, p_min: Optional[float], p_max: Optional[float]):
+    if df["target"].nunique() == 1:
+        df = df.assign(focus=lambda df: df["prediction"].between(p_min, p_max))
+        color = alt.Color("focus:N", legend=None, scale=alt.Scale(scheme="tableau10"),)
+    else:
+        color = alt.Color("target:N", scale=alt.Scale(scheme="tableau10"))
+    return (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            alt.X(
+                "prediction:Q",
+                bin=alt.Bin(step=0.01),
+                scale=alt.Scale(domain=(0, 1)),
+                title="Predicted Probability",
+            ),
+            y=alt.Y("count()", title="Number of Predictions"),
+            color=color,
+            tooltip=["target"],
+        )
+        .properties(
+            width="container", height=300, title="Distribution of Model Predictions"
+        )
+        .configure_title(fontSize=14, offset=10, orient="top", anchor="middle")
+    )
 
 
 def style_local_explanations(
