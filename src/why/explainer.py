@@ -120,6 +120,14 @@ class Explainer:
         n_cols = self.train.shape[1]
         return f"There are **{n_rows}** observations and **{n_cols - 1}** features in this dataset. The target variable is **{self.target}.**"
 
+    def get_class_test_preds(self, class_name: Optional[str]) -> np.ndarray:
+        if self.mode == "binary_classification":
+            return self.test_preds
+        else:
+            return self.test_preds[:, np.where(self.model.classes_ == class_name)][
+                :, 0
+            ][:, 0]
+
     @staticmethod
     def check_column_names(train: pd.DataFrame, test: pd.DataFrame) -> None:
         """Checks that train and test have the same columns.
