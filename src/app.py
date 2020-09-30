@@ -5,12 +5,20 @@ import sklearn
 import streamlit as st
 
 
-from why.pages import correlation, global_effects, home, importance, local_effects
+from why.pages import (
+    correlation,
+    global_effects,
+    home,
+    importance,
+    local_effects,
+    performance,
+)
 from why import data, models
 from why import Explainer
 
 PAGES = {
     "Home": home,
+    "Performance": performance,
     "Feature Importance": importance,
     "Feature Correlation": correlation,
     "Global Effects": global_effects,
