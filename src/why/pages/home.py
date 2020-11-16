@@ -1,10 +1,9 @@
 import streamlit as st
-
 from why import Explainer
 
 
 def write(exp: Explainer) -> None:
-    st.markdown("# Why?")
+    st.markdown("# IML Playground?")
     st.markdown("**_An exploration into the world of interpretable machine learning_**")
 
     st.markdown("## The Dataset")
