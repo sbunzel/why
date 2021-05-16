@@ -1,5 +1,7 @@
 # why
 
+**This repository is not maintained anymore - go to [IML Playground](https://github.com/sbunzel/iml-playground) for v2 of this project.**
+
 _An exploration of the world of interpretable machine learning_
 
 Machine learning has become ubiquitous. Media coverage on ML's effectiveness proliferate, both in professional networks and popular media while ML experts continue to be in high demand. Online courses place education on popular ML methods at anyone's fingertips - from the basics to the cutting edge. And tools like scikit-learn or high-level interfaces to TensorFlow and PyTorch, make training a supervised model as easy as calling `.fit(X, y)`.
